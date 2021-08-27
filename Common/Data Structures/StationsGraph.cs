@@ -26,5 +26,8 @@ namespace Common.Data_Structures
             _stations[6] = new LinkedList<StationModel>(new StationModel[] { new StationModel(6, 7) }); // Also has an exit
             _stations[7] = new LinkedList<StationModel>(new StationModel[] { new StationModel(7, 3) }); // Station before runway.
         }
+
+        // Create add stations function?
+        // (station numbers are pre-set, therefor no need for this, but as a future addition it might be good)
     }
 }
