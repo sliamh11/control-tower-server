@@ -12,7 +12,7 @@ namespace BLL.Data_Objects
     {
         private IDepartureLogic _logic;
         public FlightModel Flight { get; set; }
-        public StationModel Station { get; set; }
+        public StationsPathModel StationsPath { get; set; }
 
         // For DI
         public DepartureObj(IDepartureLogic departureLogic)
@@ -24,7 +24,7 @@ namespace BLL.Data_Objects
         public DepartureObj(string flightId)
         {
             Flight = new FlightModel(flightId);
-            Station = _logic?.StartDeparture(Flight);
+            StationsPath = _logic?.StartDeparture(this);
             //Timer timer = new Timer(cbFunc,null,60000,randomNumber);
         }
     }

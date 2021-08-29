@@ -7,5 +7,6 @@ namespace BLL.Interfaces
         StationsGraph Stations { get; set; }
         StationsGraph GetStationsState();
         void LoadStations();
+        void StateUpdated();
     }
 }

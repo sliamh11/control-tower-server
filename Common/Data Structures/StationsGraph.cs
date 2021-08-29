@@ -9,7 +9,11 @@ namespace Common.Data_Structures
 {
     public class StationsGraph
     {
-        // Do I need stations to know their numbers?
+        // Do I need stations to know their numbers? -> downside - items are less generic because the station number might be changed with the list.
+        // A List of Linked lists of type StationModel might be better
+        // because I can add / remove stations while maintaining the O(1) indexer.
+        //private List<LinkedList<StationModel>> _stations;
+
         private LinkedList<StationModel>[] _stations;
         public StationsGraph()
         {
@@ -28,7 +32,9 @@ namespace Common.Data_Structures
         }
 
         // Create add stations function
-        // Path calculation - maybe categorize each station added, then add them to a dictionary / array and use those as specific entry points
+
+        // Path calculation (Diakstra's algo?) -> return fastest route.
+        // Maybe categorize each station added, then add them to a dictionary / array and use those as specific entry points
         // For example, if station 5 is considered as a Departure station, it is possible to check if the path from this station to the runway is clear, etc.
     }
 }

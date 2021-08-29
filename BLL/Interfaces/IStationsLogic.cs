@@ -1,10 +1,11 @@
 ﻿using Common.Models;
+using System;
 
 namespace BLL.Interfaces
 {
-    public interface IStationsLogic
+    internal interface IStationsLogic
     {
-        bool CanMoveToNextStation(FlightModel flight);
-        bool MoveToNextStation(FlightModel flight);
+        bool MoveToNextStation(IDataObj dataObj);
+        DateTime CalcEndTime(StationsPathModel path);
     }
 }

@@ -10,6 +10,6 @@ namespace BLL.Interfaces
     internal interface IDataObj
     {
         public FlightModel Flight { get; set; }
-        public StationModel Station { get; set; }
+        public StationsPathModel StationsPath { get; set; }
     }
 }

@@ -1,11 +1,11 @@
-﻿using Common.Models;
+﻿using BLL.Data_Objects;
+using Common.Models;
 
 namespace BLL.Interfaces
 {
-    public interface ILandingLogic : IStationsLogic
+    internal interface ILandingLogic : IStationsLogic
     {
-        StationModel StartLanding(FlightModel flight);
-        bool CanFinishLanding();
-        void FinishLanding();
+        StationsPathModel StartLanding(LandingObj landingObj);
+        bool FinishLanding(LandingObj landingObj);
     }
 }

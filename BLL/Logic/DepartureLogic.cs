@@ -1,10 +1,11 @@
-﻿using BLL.Interfaces;
+﻿using BLL.Data_Objects;
+using BLL.Interfaces;
 using Common.Models;
 using System;
 
 namespace BLL.Logic
 {
-    public class DepartureLogic : IDepartureLogic
+    internal class DepartureLogic : IDepartureLogic
     {
         private IStationsState _stationsState;
         public DepartureLogic(IStationsState stationsState)
@@ -12,31 +13,37 @@ namespace BLL.Logic
             _stationsState = stationsState;
         }
 
-        public bool CanFinishDeparture()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool CanMoveToNextStation(FlightModel flight)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void FinishDaperture()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool MoveToNextStation(FlightModel flight)
-        {
-            throw new NotImplementedException();
-        }
-
-        public StationModel StartDeparture(FlightModel flight)
+        public StationsPathModel StartDeparture(DepartureObj departureObj)
         {
             // Maybe create a function inside the Graph for that?
             // Set station [0].Flight = flight
             return null; // return the station
         }
+
+        private bool CanMoveToNextStation(IDataObj dataObj)
+        {
+            throw new NotImplementedException();
+        }
+        public bool MoveToNextStation(IDataObj dataObj)
+        {
+            throw new NotImplementedException();
+        }
+
+        private bool CanFinishDeparture()
+        {
+            throw new NotImplementedException();
+        }
+        public void FinishDaperture(DepartureObj departureObj)
+        {
+            throw new NotImplementedException();
+        }
+
+        public DateTime CalcEndTime(StationsPathModel path)
+        {
+            // Get the shortest path from the Graph and calc the arrival time .
+            throw new NotImplementedException();
+        }
+
+
     }
 }

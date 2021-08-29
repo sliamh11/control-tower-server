@@ -34,5 +34,14 @@ namespace BLL
         {
             throw new NotImplementedException();
         }
+
+        public void StateUpdated()
+        {
+            // Called each time something updated the _stations field.
+            // Emits the updated state to all subscribers (client + DB).
+
+            // Maybe somehow updated it in 'set' if its even possible?
+            throw new NotImplementedException();
+        }
     }
 }

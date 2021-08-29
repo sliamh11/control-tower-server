@@ -1,11 +1,11 @@
-﻿using Common.Models;
+﻿using BLL.Data_Objects;
+using Common.Models;
 
 namespace BLL.Interfaces
 {
-    public interface IDepartureLogic : IStationsLogic
+    internal interface IDepartureLogic : IStationsLogic
     {
-        StationModel StartDeparture(FlightModel flight);
-        bool CanFinishDeparture();
-        void FinishDaperture();
+        StationsPathModel StartDeparture(DepartureObj departureObj);
+        bool FinishDaperture(DepartureObj departureObj);
     }
 }
