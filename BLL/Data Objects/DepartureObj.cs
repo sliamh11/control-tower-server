@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BLL.Data_Objects
 {
-    internal class DepartureObj
+    internal class DepartureObj : IDataObj
     {
         private IDepartureLogic _logic;
         public FlightModel Flight { get; set; }
@@ -25,6 +25,7 @@ namespace BLL.Data_Objects
         {
             Flight = new FlightModel(flightId);
             Station = _logic?.StartDeparture(Flight);
+            //Timer timer = new Timer(cbFunc,null,60000,randomNumber);
         }
     }
 }

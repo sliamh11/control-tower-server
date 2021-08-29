@@ -27,7 +27,8 @@ namespace Common.Data_Structures
             _stations[7] = new LinkedList<StationModel>(new StationModel[] { new StationModel(7, 3) }); // Station before runway.
         }
 
-        // Create add stations function?
-        // (station numbers are pre-set, therefor no need for this, but as a future addition it might be good)
+        // Create add stations function
+        // Path calculation - maybe categorize each station added, then add them to a dictionary / array and use those as specific entry points
+        // For example, if station 5 is considered as a Departure station, it is possible to check if the path from this station to the runway is clear, etc.
     }
 }

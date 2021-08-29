@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BLL.Data_Objects
 {
-    internal class LandingObj
+    internal class LandingObj : IDataObj
     {
         private ILandingLogic _logic;
         public FlightModel Flight { get; set; }
@@ -23,6 +23,7 @@ namespace BLL.Data_Objects
         {
             Flight = new FlightModel(flightId);
             Station = _logic?.StartLanding(Flight);
+            //Timer timer = new Timer(cbFunc,null,60000,randomNumber);
         }
     }
 }

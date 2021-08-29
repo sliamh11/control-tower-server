@@ -21,20 +21,24 @@ namespace BLL
         {
             if (CanStartDeparture())
             {
-                // Task.Run(DepartureObj...)
+                // Task.Run(new DepartureObj...)
                 return true;
             }
             return false;
+
+            // SignalR notification to client side & DB
         }
 
         public bool StartLanding(string flightId)
         {
             if (CanStartLanding())
             {
-                // Task.Run(LandingObj...)
+                // Task.Run(new LandingObj...)
                 return true;
             }
             return false;
+
+            // SignalR notification to client side & DB
         }
 
         private bool CanStartDeparture()
