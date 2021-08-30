@@ -1,5 +1,6 @@
 ﻿using Common.Data_Structures;
 using Common.Models;
+using System.Collections.Generic;
 
 namespace BLL.Interfaces
 {
@@ -8,6 +9,6 @@ namespace BLL.Interfaces
         void LoadStations();
         bool StartDeparture(string flightId);
         bool StartLanding(string flightId);
-        StationsGraph GetStationsState();
+        IReadOnlyList<LinkedList<StationModel>> GetStationsState();
     }
 }

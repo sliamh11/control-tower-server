@@ -1,4 +1,5 @@
 ﻿using BLL.Interfaces;
+using Common.Enums;
 using Common.Models;
 using System;
 using System.Collections.Generic;
@@ -14,8 +15,8 @@ namespace BLL.Data_Objects
         #region Private Fields
         private ILandingLogic _logic;
         private Timer _timer;
-        private int _dueTime;
-        private int _periodTime;
+        private TimeSpan _dueTime;
+        private TimeSpan _periodTime;
         #endregion
 
         #region Public Properties
@@ -30,10 +31,10 @@ namespace BLL.Data_Objects
 
         public LandingObj(string flightId)
         {
-            Flight = new FlightModel(flightId);
+            Flight = new FlightModel(flightId, FlightType.Landing);
             StationsPath = _logic?.StartLanding(this);
-            _dueTime = 60000;
-            _periodTime = 60000;
+            _dueTime = new TimeSpan(0);
+            _periodTime = StationsPath.CurrentStation.StandbyPeriod;
             _timer = new Timer(OnTimerElapsed, null, _dueTime, _periodTime);
         }
 
@@ -45,14 +46,17 @@ namespace BLL.Data_Objects
                 return;
             }
 
-            // Change next period time (might need 0 instead _dueTime)
-            //Random rand = new Random();
-            // _periodTime = rand.Next(30000, 60001);
-            //_timer.Change(_dueTime, _periodTime); // roll a random number between 30-60 seconds.
 
-            if (!_logic.MoveToNextStation(this))
+            if (_logic.MoveToNextStation(this))
             {
-                // Update the flight's final time by _periodTime 
+                // Update the _periodTime to the station's StandbyTime.
+                _periodTime = StationsPath.CurrentStation.StandbyPeriod;
+                _timer.Change(new TimeSpan(0), _periodTime);
+            }
+            else
+            {
+                // Delay scedhualed landing.
+                Flight.LandingTime += _periodTime;
             }
         }
     }

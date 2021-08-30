@@ -3,7 +3,7 @@ using System;
 
 namespace Common.Models
 {
-    public class StationModel
+    public class StationModel : IComparable<StationModel>
     {
         public readonly int Number;
         public int NextStation { get; set; }
@@ -17,6 +17,13 @@ namespace Common.Models
             Number = stationNumber;
             NextStation = nextStation;
             StandbyPeriod = standBy;
+        }
+
+        public int CompareTo(StationModel other)
+        {
+            return Number.CompareTo(other.Number)
+                + NextStation.CompareTo(other.NextStation)
+                + Type.CompareTo(other.Type);
         }
     }
 }

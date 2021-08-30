@@ -12,6 +12,7 @@ namespace Common.Enums
         Normal,
         Combined,
         Landing,
-        Departure
+        Departure,
+        Runway
     }
 }

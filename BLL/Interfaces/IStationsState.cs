@@ -1,12 +1,14 @@
 ﻿using Common.Data_Structures;
+using Common.Models;
+using System.Collections.Generic;
 
 namespace BLL.Interfaces
 {
     public interface IStationsState
     {
-        StationsGraph Stations { get; set; }
-        StationsGraph GetStationsState();
         void LoadStations();
         void StateUpdated();
+        IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState();
+        void AddStation(List<StationModel> newStation);
     }
 }

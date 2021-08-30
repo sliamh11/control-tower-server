@@ -2,6 +2,7 @@
 using Common.Data_Structures;
 using Common.Models;
 using System;
+using System.Collections.Generic;
 
 namespace BLL
 {
@@ -13,7 +14,7 @@ namespace BLL
             _stationsState = stationsState;
         }
 
-        public StationsGraph GetStationsState() => _stationsState.GetStationsState();
+        public IReadOnlyList<LinkedList<StationModel>> GetStationsState() => _stationsState.GetStationsState();
 
         public void LoadStations() => _stationsState.LoadStations();
 
