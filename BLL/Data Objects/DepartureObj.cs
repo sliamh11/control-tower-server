@@ -1,4 +1,5 @@
 ﻿using BLL.Interfaces;
+using Common.Enums;
 using Common.Models;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace BLL.Data_Objects
         // For params
         public DepartureObj(string flightId)
         {
-            Flight = new FlightModel(flightId);
+            Flight = new FlightModel(flightId, FlightType.Departure);
             StationsPath = _logic?.StartDeparture(this);
             //Timer timer = new Timer(cbFunc,null,60000,randomNumber);
         }

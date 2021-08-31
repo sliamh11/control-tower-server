@@ -14,9 +14,12 @@ namespace BLL
             _stationsState = stationsState;
         }
 
-        public IReadOnlyList<LinkedList<StationModel>> GetStationsState() => _stationsState.GetStationsState();
+        public void AddStation(List<StationModel> newStation)
+        {
+            throw new NotImplementedException();
+        }
 
-        public void LoadStations() => _stationsState.LoadStations();
+        public IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState() => _stationsState.GetStationsState();
 
         public bool StartDeparture(string flightId)
         {

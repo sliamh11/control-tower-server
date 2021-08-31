@@ -6,7 +6,6 @@ namespace BLL.Interfaces
 {
     public interface IStationsState
     {
-        void LoadStations();
         void StateUpdated();
         IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState();
         void AddStation(List<StationModel> newStation);

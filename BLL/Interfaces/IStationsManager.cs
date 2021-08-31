@@ -6,9 +6,9 @@ namespace BLL.Interfaces
 {
     public interface IStationsManager
     {
-        void LoadStations();
+        void AddStation(List<StationModel> newStation);
         bool StartDeparture(string flightId);
         bool StartLanding(string flightId);
-        IReadOnlyList<LinkedList<StationModel>> GetStationsState();
+        IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState();
     }
 }
