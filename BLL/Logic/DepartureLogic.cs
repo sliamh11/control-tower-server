@@ -33,7 +33,7 @@ namespace BLL.Logic
         {
             throw new NotImplementedException();
         }
-        public void FinishDaperture(DepartureObj departureObj)
+        public bool FinishDaperture(DepartureObj departureObj)
         {
             throw new NotImplementedException();
         }
@@ -43,7 +43,5 @@ namespace BLL.Logic
             // Get the shortest path from the Graph and calc the arrival time .
             throw new NotImplementedException();
         }
-
-
     }
 }

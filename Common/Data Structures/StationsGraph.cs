@@ -22,6 +22,7 @@ namespace Common.Data_Structures
             _stations = new List<List<StationModel>>(15);
         }
 
+        // Add LandingStationsList & DepartureStationsList and save specific spots to make it easier and faster later on.
         public void AddStation(List<StationModel> station) => _stations.Add(station);
 
         public IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState() => _stations;
@@ -40,18 +41,19 @@ namespace Common.Data_Structures
         }
 
         // Dijakstra's algo
-        public IReadOnlyList<StationModel> FindFastestPath(int startIndex)
+        public StationsPathModel FindFastestPath(int startIndex, int targetIndex)
         {
             // How will it work:
             // Instead of saving it all in a big array, save ONLY the minimal path (get it as a param each function call).
             // Side note - maybe make an inner class in the graph which represents the data - understand what is needed
-            if (startIndex < 0 || startIndex >= _stations.Count)
+            if (startIndex < 0 || startIndex >= _stations.Count
+                || targetIndex <= startIndex || targetIndex >= _stations.Count)
                 throw new ArgumentOutOfRangeException("Start index was out of the array's boundries.");
 
             StationsTable[] table = new StationsTable[_stations.Count];
             InitStationsTable(table, startIndex);
-            FillStationsTable(startIndex, table);
-            return GetFastestPath(table);
+            FillStationsTable(startIndex, targetIndex, table);
+            return GetFastestPath(targetIndex, table);
         }
 
         // O(n)
@@ -62,8 +64,8 @@ namespace Common.Data_Structures
                 table[i] = new StationsTable
                 {
                     StationIndex = i,
-                    IsVisited = false,
                     PrevStation = null,
+                    IsVisited = false,
                     Weight = new TimeSpan(1, 0, 0, 0) // 1 Day as max value.
                 };
             }
@@ -71,56 +73,56 @@ namespace Common.Data_Structures
         }
 
         // O(n^2) (recursive + inner loops)
-        private void FillStationsTable(int index, StationsTable[] table)
+        private void FillStationsTable(int index, int targetIndex, StationsTable[] table)
         {
-            if (table.All(station => station.IsVisited))
-                return;
-
-            foreach (var item in _stations[index])
+            while (table.Any(table => !table.IsVisited))
             {
-                TimeSpan newWeight = table[index].Weight + item.StandbyPeriod;
-                var destTable = table[item.NextStation];
-                // If current total time (weight) + the station's StandbyTime < the weight of the next station in the table
-                if (newWeight < destTable.Weight)
-                {
-                    destTable.Weight = newWeight;
-                    destTable.PrevStation = item; // Save the current station to get it's reference.
-                }
-            }
+                table[index].IsVisited = true;
 
-            // Get the table with the lowest weight which havn't been visited yet.
-            index = table.Where(i => !i.IsVisited).OrderBy(i => i.Weight).Select(i => i.StationIndex).FirstOrDefault();
-            FillStationsTable(index, table);
+                foreach (var item in _stations[index])
+                {
+                    TimeSpan newWeight = table[index].Weight + item.StandbyPeriod;
+                    var destTable = table[item.NextStation];
+                    // If current total time (weight) + the station's StandbyTime < the weight of the next station in the table
+                    if (newWeight < destTable.Weight)
+                    {
+                        destTable.Weight = newWeight;
+                        destTable.PrevStation = item; // Save the current station to get it's reference.
+                    }
+                }
+
+                index = table.Where(t => !t.IsVisited).OrderBy(t => t.Weight).Select(t => t.StationIndex).FirstOrDefault();
+            }
         }
         // O(n^2) (loop in a loop)
-        private IReadOnlyList<StationModel> GetFastestPath(StationsTable[] table)
+        private StationsPathModel GetFastestPath(int targetIndex, StationsTable[] table)
         {
-            TimeSpan minimalTime = new TimeSpan(1, 0, 0, 0);
-            List<StationModel> path = null;
-            foreach (var item in table)
-            {
-                Stack<StationModel> pathStack = new Stack<StationModel>();
-                int tempIndex = item.StationIndex;
-                TimeSpan pathTime = new TimeSpan(0);
-                while (table[tempIndex].PrevStation != null)
-                {
-                    pathStack.Push(table[tempIndex].PrevStation);
-                    tempIndex = table[tempIndex].PrevStation.Number;
-                    pathTime += table[tempIndex].Weight;
-                }
+            Stack<StationModel> pathStack = new Stack<StationModel>();
+            TimeSpan pathTime = new TimeSpan(0);
 
-                if (pathTime < minimalTime)
-                {
-                    var stations = new List<StationModel>(pathStack.Count);
-                    while (pathStack.Count > 0)
-                    {
-                        stations.Add(pathStack.Pop());
-                    }
-                    path = stations;
-                    minimalTime = pathTime;
-                }
+            // Not efficient, try to chanage it.
+            TimeSpan lastStationTime = _stations[targetIndex].Min(station => station.StandbyPeriod);
+            StationModel lastStation = _stations[targetIndex].FirstOrDefault(station => station.StandbyPeriod == lastStationTime);
+
+            if (lastStation != null)
+                pathStack.Push(lastStation);
+
+            while (table[targetIndex].PrevStation != null)
+            {
+                pathStack.Push(table[targetIndex].PrevStation);
+                targetIndex = table[targetIndex].PrevStation.Number;
             }
-            return path;
+
+            var stations = new List<StationModel>(pathStack.Count);
+
+            while (pathStack.Count > 0)
+            {
+                var station = pathStack.Pop();
+                pathTime += station.StandbyPeriod;
+                stations.Add(station);
+            }
+
+            return new StationsPathModel(stations, pathTime);
         }
 
         private class StationsTable
@@ -130,5 +132,6 @@ namespace Common.Data_Structures
             public TimeSpan Weight { get; set; }
             public StationModel PrevStation { get; set; }
         }
+
     }
 }

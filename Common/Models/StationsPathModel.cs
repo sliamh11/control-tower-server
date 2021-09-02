@@ -1,15 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Common.Models
 {
     public class StationsPathModel
     {
-        public Queue<int> Path { get; set; } // Indexs of stations
+        public IReadOnlyList<StationModel> Path { get; set; }
         public StationModel CurrentStation { get; set; }
+        public TimeSpan OverallTime { get; set; }
 
-        public StationsPathModel(Queue<int> stationsPath)
+        public StationsPathModel(IReadOnlyList<StationModel> stationsPath, TimeSpan time)
         {
             Path = stationsPath;
+            CurrentStation = Path[0];
+            OverallTime = time;
         }
     }
 }
