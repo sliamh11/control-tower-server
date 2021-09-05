@@ -40,6 +40,91 @@ namespace Common.Data_Structures
             return false;
         }
 
+        public StationsPathModel FindFastestRoute(int startIndex, int targetIndex)
+        {
+            bool[][] isVisited = new bool[_stations.Count][];
+            for (int i = 0; i < isVisited.Length; i++)
+            {
+                isVisited[i] = new bool[_stations[i].Count];
+            }
+            isVisited[startIndex][0] = true;
+            var stationsList = new List<List<StationModel>>();
+            FindRoutes(startIndex, startIndex, targetIndex, stationsList, null, isVisited);
+            if (stationsList.Count > 0)
+                return FindFastestRoute(stationsList);
+            return null;
+        }
+
+        // Might want to add another List<StationModel> param for current stations.
+        private bool FindRoutes(int current,
+            int startIndex,
+            int targetIndex,
+            List<List<StationModel>> stationsList,
+            List<StationModel> station,
+            bool[][] isVisited)
+        {
+            if (station == null)
+                station = new List<StationModel>();
+
+            if (_stations[current] == null)
+                return false; // If reached end point (check it)
+
+            if (current == targetIndex)
+                return true;
+
+            for (int i = 0; i < _stations[current].Count; i++)
+            {
+                var item = _stations[current][i];
+
+                if (isVisited[item.NextStation][i])
+                    continue; // If the item has already been checked, skip it.
+
+                isVisited[item.NextStation][i] = true;
+                bool isPathFound = FindRoutes(item.NextStation, targetIndex, stationsList, station, isVisited);
+
+                if (isPathFound)
+                {
+                    station.Add(item);
+                    if (item.Number == startIndex)
+
+                    return true;
+                }
+
+                // When we reach here we actually on our way back after non of the above returned true.
+                // Since I dont want the visited items to be = true (because I need to check them in more then one scenario), I'll get their value returned to false. Thats OK because there's no way I'll go the same way on the same root.
+                isVisited[item.NextStation][i] = false;
+            }
+            if (station.Count > 0)
+                stationsList.Add(station);
+            return stationsList.Count > 0;
+        }
+
+        // O(n*m)
+        private StationsPathModel FindFastestRoute(List<List<StationModel>> stationsList)
+        {
+            if (stationsList.Count == 0)
+                return null;
+
+            var minTime = new TimeSpan(1, 0, 0, 0);
+            var fastestRoute = new List<StationModel>();
+
+            foreach (var station in stationsList)
+            {
+                var currentTime = new TimeSpan(0);
+                foreach (var item in station)
+                {
+                    currentTime += item.StandbyPeriod;
+                }
+                if (currentTime < minTime)
+                {
+                    fastestRoute = station;
+                    minTime = currentTime;
+                }
+            }
+
+            return new StationsPathModel(fastestRoute, minTime);
+        }
+
         // Dijakstra's algo
         public StationsPathModel FindFastestPath(int startIndex, int targetIndex)
         {
@@ -72,7 +157,7 @@ namespace Common.Data_Structures
             table[source].Weight = new TimeSpan(0);
         }
 
-        // O(n^2) (recursive + inner loops)
+        // O(n Log n) (recursive + decreasing inner loops)
         private void FillStationsTable(int index, int targetIndex, StationsTable[] table)
         {
             while (table.Any(table => !table.IsVisited))
@@ -94,7 +179,7 @@ namespace Common.Data_Structures
                 index = table.Where(t => !t.IsVisited).OrderBy(t => t.Weight).Select(t => t.StationIndex).FirstOrDefault();
             }
         }
-        // O(n^2) (loop in a loop)
+        // O(n) 
         private StationsPathModel GetFastestPath(int targetIndex, StationsTable[] table)
         {
             Stack<StationModel> pathStack = new Stack<StationModel>();
