@@ -43,13 +43,17 @@ namespace Common.Data_Structures
         public StationsPathModel FindFastestRoute(int startIndex, int targetIndex)
         {
             bool[][] isVisited = new bool[_stations.Count][];
+            bool isRouteExists = false;
             for (int i = 0; i < isVisited.Length; i++)
             {
                 isVisited[i] = new bool[_stations[i].Count];
             }
             isVisited[startIndex][0] = true;
             var stationsList = new List<List<StationModel>>();
-            FindRoutes(startIndex, startIndex, targetIndex, stationsList, null, isVisited);
+            do
+            {
+                isRouteExists = FindRoutes(startIndex, startIndex, targetIndex, stationsList, null, isVisited);
+            } while (!ResetVisitedStations(0, isVisited).Item1 && isRouteExists);
             if (stationsList.Count > 0)
                 return FindFastestRoute(stationsList);
             return null;
@@ -80,12 +84,13 @@ namespace Common.Data_Structures
                     continue; // If the item has already been checked, skip it.
 
                 isVisited[item.NextStation][i] = true;
-                bool isPathFound = FindRoutes(item.NextStation, targetIndex, stationsList, station, isVisited);
+                bool isPathFound = FindRoutes(item.NextStation, startIndex, targetIndex, stationsList, station, isVisited);
 
                 if (isPathFound)
                 {
                     station.Add(item);
                     if (item.Number == startIndex)
+                        stationsList.Add(station);
 
                     return true;
                 }
@@ -94,9 +99,43 @@ namespace Common.Data_Structures
                 // Since I dont want the visited items to be = true (because I need to check them in more then one scenario), I'll get their value returned to false. Thats OK because there's no way I'll go the same way on the same root.
                 isVisited[item.NextStation][i] = false;
             }
-            if (station.Count > 0)
-                stationsList.Add(station);
-            return stationsList.Count > 0;
+
+            return false;
+        }
+
+        private Tuple<bool, int> ResetVisitedStations(int current, bool[][] isVisited)
+        {
+            // Go from last to first
+            // When a row contains a false column - go to the next row and start resetting it all from the start
+            // return when all of the first row's columns are true.
+            bool isRowNotDone = false;
+            if (isVisited[current + 1] != null)
+            {
+                var result = ResetVisitedStations(current + 1, isVisited);
+                isRowNotDone = result.Item1;
+                if (isRowNotDone)
+                {
+                    for (int i = 0; i < isVisited[current].Length; i++)
+                        isVisited[current][i] = false;
+
+                    return new Tuple<bool, int>(true, result.Item2);
+                }
+            }
+
+            // when reaching here, im in the end of the isVisited row (at first)
+
+            // Check if row contains visited & unvisited slots
+            if (current > 0)
+            {
+                var rowNotDone = isVisited[current].Any(item => item && !item);
+                return new Tuple<bool, int>(rowNotDone, current);
+            }
+            else
+            {
+                return isVisited[current].All(visit => visit)
+                    ? new Tuple<bool, int>(true, current)
+                    : new Tuple<bool, int>(false, current); // Done
+            }
         }
 
         // O(n*m)
