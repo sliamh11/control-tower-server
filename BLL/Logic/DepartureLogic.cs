@@ -37,11 +37,5 @@ namespace BLL.Logic
         {
             throw new NotImplementedException();
         }
-
-        public DateTime CalcEndTime(StationsPathModel path)
-        {
-            // Get the shortest path from the Graph and calc the arrival time .
-            throw new NotImplementedException();
-        }
     }
 }

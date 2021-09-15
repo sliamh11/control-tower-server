@@ -3,8 +3,6 @@ using Common.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Common.Data_Structures
 {
@@ -55,8 +53,24 @@ namespace Common.Data_Structures
             return GetFastestPath(targetIndex, table);
         }
 
+        // Dijakstra's algo (for specific start & end stations)
+        public StationsPathModel FindFastestPath(StationModel startStation, StationModel targetStation)
+        {
+            int startIndex = startStation.Number;
+            int targetIndex = targetStation.Number;
+
+            if (startIndex < 0 || startIndex >= _stations.Count
+               || targetIndex <= 0 || targetIndex >= _stations.Count)
+                throw new ArgumentOutOfRangeException("Start index was out of the array's boundries.");
+
+            StationsTable[] table = new StationsTable[_stations.Count];
+            InitStationsTable(table, startIndex);
+            FillStationsTable(startIndex, table, startStation, targetStation);
+            return GetFastestPath(targetIndex, table);
+        }
+
         // O(n)
-        private void InitStationsTable(StationsTable[] table, int source)
+        private void InitStationsTable(StationsTable[] table, int startIndex)
         {
             for (int i = 0; i < _stations.Count; i++)
             {
@@ -65,10 +79,10 @@ namespace Common.Data_Structures
                     StationIndex = i,
                     PrevStation = null,
                     IsVisited = false,
-                    Weight = new TimeSpan(1, 0, 0, 0) // 1 Day as max value.
+                    Weight = TimeSpan.MaxValue // 1 Day as max value.
                 };
             }
-            table[source].Weight = new TimeSpan(0);
+            table[startIndex].Weight = new TimeSpan(0);
         }
 
         // O(n Log n)
@@ -90,6 +104,64 @@ namespace Common.Data_Structures
                     }
                 }
                 index = table.Where(t => !t.IsVisited).OrderBy(t => t.Weight).Select(t => t.StationIndex).FirstOrDefault();
+            }
+        }
+
+        // O(n Log n)
+        private void FillStationsTable(int index, StationsTable[] table, StationModel startStation, StationModel targetStation)
+        {
+            while (table.Any(table => !table.IsVisited))
+            {
+                table[index].IsVisited = true;
+
+                if (index == startStation.Number)
+                {
+                    TimeSpan weight = table[index].Weight + startStation.StandbyPeriod;
+                    var destTable = table[startStation.NextStation];
+                    destTable.Weight = weight;
+                    destTable.PrevStation = startStation;
+                }
+                else if (index == targetStation.Number)
+                {
+                    TimeSpan weight = table[index].Weight + targetStation.StandbyPeriod;
+                    var destTable = table[targetStation.NextStation];
+                    destTable.Weight = weight;
+                    destTable.PrevStation = targetStation;
+                }
+                else
+                {
+                    foreach (var item in _stations[index])
+                    {
+                        TimeSpan newWeight = table[index].Weight + item.StandbyPeriod;
+                        var destTable = table[item.NextStation];
+                        // If current total time (weight) + the station's StandbyTime < the weight of the next station in the table
+                        if (newWeight < destTable.Weight)
+                        {
+                            destTable.Weight = newWeight;
+                            destTable.PrevStation = item; // Save the current station to get it's reference.
+                        }
+                    }
+                }
+                index = table.Where(t => !t.IsVisited).OrderBy(t => t.Weight).Select(t => t.StationIndex).FirstOrDefault();
+            }
+        }
+
+        // O(n)
+        public void MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight)
+        {
+            if (fromStation == null || toStation == null)
+                throw new StationNotFoundException();
+
+            var startStation = _stations[fromStation.Number].Find(x => x.CompareTo(fromStation) == 0);
+            var targetStation = _stations[toStation.Number].Find(x => x.CompareTo(toStation) == 0);
+
+            if (startStation == null || targetStation == null)
+                throw new StationNotFoundException();
+
+            if (startStation.CurrentFlight == flight && targetStation.CurrentFlight == null)
+            {
+                startStation.CurrentFlight = null;
+                targetStation.CurrentFlight = flight;
             }
         }
 

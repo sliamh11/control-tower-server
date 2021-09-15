@@ -38,6 +38,7 @@ namespace BLL.Data_Objects
             _timer = new Timer(OnTimerElapsed, null, _dueTime, _periodTime);
         }
 
+        // Add setter for estimated landing time (with the time from StationsModelPath)
         private void OnTimerElapsed(object state)
         {
             if (_logic.FinishLanding(this))

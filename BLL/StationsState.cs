@@ -80,6 +80,23 @@ namespace BLL
             }
         }
 
+        public StationsPathModel FindFastestPath(StationModel currStation, StationModel targetStation)
+        {
+            lock (_stationsLock)
+            {
+                return _stations.FindFastestPath(currStation, targetStation);
+            }
+        }
+
+        public void MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight)
+        {
+            lock (_stationsLock)
+            {
+                _stations.MoveToStation(fromStation, toStation, flight);
+            }
+        }
+
+
         //public bool UpdateStation(int index, object updatedStation)
         //{
         //    lock (_stationsLock)

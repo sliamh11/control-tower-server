@@ -3,10 +3,6 @@ using BLL.Interfaces;
 using Common.Exceptions;
 using Common.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BLL.Logic
 {
@@ -54,35 +50,30 @@ namespace BLL.Logic
         }
         public bool MoveToNextStation(IDataObj dataObj)
         {
+            var currStation = dataObj.StationsPath.CurrentStation;
+            int targetIndex = dataObj.StationsPath.Path.Count - 1;
+            var targetStation = dataObj.StationsPath.Path[targetIndex];
             try
             {
                 if (CanMoveToNextStation(dataObj))
                 {
-                    // Reset current station's flight (need to make a function - LeaveStation())
-                    // Find fastest route from the next station to the target - with overrided FindFastestPath func (accepts objects)
+                    var nextStation = dataObj.StationsPath.Path[1];
+                    _stationsState.FindFastestPath(nextStation, targetStation);
+                    _stationsState.MoveToStation(currStation, nextStation, dataObj.Flight); // Activated only when found a valid path from the next station.
+
                     // Call the StateUpdated() func.
                     // Update DB?
                     return true;
                 }
-                return false;
             }
-            catch (StationNotFoundException ex)
+            catch (StationNotFoundException)
             {
-                var currStation = dataObj.StationsPath.CurrentStation;
-                int targetIndex = dataObj.StationsPath.Path.Count - 1;
-                var targetStation = dataObj.StationsPath.Path[targetIndex];
-                // Make an override function for FindFastestPath which accepts StationModels as params instead of integers (to know the exact stations)
+                // Re-set the flight's stations path.
                 dataObj.StationsPath = _stationsState.FindFastestPath(currStation, targetStation);
                 MoveToNextStation(dataObj);
             }
-
+            return false;
             // Other exceptions will be cought in the service?
-        }
-
-        public DateTime CalcEndTime(StationsPathModel path)
-        {
-            // Get shortest path from graph and calc time to arrive to final station.
-            throw new NotImplementedException();
         }
     }
 }
