@@ -1,4 +1,5 @@
-﻿using Common.Models;
+﻿using Common.Exceptions;
+using Common.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +32,8 @@ namespace Common.Data_Structures
         public bool UpdateStation(StationModel updatedStation)
         {
             var station = _stations[updatedStation.Number];
-            int index = station.FindIndex(station => station.CompareTo(updatedStation) == 0);
+            int index = station.IndexOf(updatedStation); // Compares with .Equals() (supposes to work on ref)
+            //int index = station.FindIndex(station => station.CompareTo(updatedStation) == 0);
             if (index >= 0)
             {
                 station[index] = updatedStation; // Should work (is by reference), if not - change the _stations directly
@@ -40,143 +42,16 @@ namespace Common.Data_Structures
             return false;
         }
 
-        public StationsPathModel FindFastestRoute(int startIndex, int targetIndex)
-        {
-            bool[][] isVisited = new bool[_stations.Count][];
-            bool isRouteExists = false;
-            for (int i = 0; i < isVisited.Length; i++)
-            {
-                isVisited[i] = new bool[_stations[i].Count];
-            }
-            isVisited[startIndex][0] = true;
-            var stationsList = new List<List<StationModel>>();
-            do
-            {
-                isRouteExists = FindRoutes(startIndex, startIndex, targetIndex, stationsList, null, isVisited);
-            } while (!ResetVisitedStations(0, isVisited).Item1 && isRouteExists);
-            if (stationsList.Count > 0)
-                return FindFastestRoute(stationsList);
-            return null;
-        }
-
-        // Might want to add another List<StationModel> param for current stations.
-        private bool FindRoutes(int current,
-            int startIndex,
-            int targetIndex,
-            List<List<StationModel>> stationsList,
-            List<StationModel> station,
-            bool[][] isVisited)
-        {
-            if (station == null)
-                station = new List<StationModel>();
-
-            if (_stations[current] == null)
-                return false; // If reached end point (check it)
-
-            if (current == targetIndex)
-                return true;
-
-            for (int i = 0; i < _stations[current].Count; i++)
-            {
-                var item = _stations[current][i];
-
-                if (isVisited[item.NextStation][i])
-                    continue; // If the item has already been checked, skip it.
-
-                isVisited[item.NextStation][i] = true;
-                bool isPathFound = FindRoutes(item.NextStation, startIndex, targetIndex, stationsList, station, isVisited);
-
-                if (isPathFound)
-                {
-                    station.Add(item);
-                    if (item.Number == startIndex)
-                        stationsList.Add(station);
-
-                    return true;
-                }
-
-                // When we reach here we actually on our way back after non of the above returned true.
-                // Since I dont want the visited items to be = true (because I need to check them in more then one scenario), I'll get their value returned to false. Thats OK because there's no way I'll go the same way on the same root.
-                isVisited[item.NextStation][i] = false;
-            }
-
-            return false;
-        }
-
-        private Tuple<bool, int> ResetVisitedStations(int current, bool[][] isVisited)
-        {
-            // Go from last to first
-            // When a row contains a false column - go to the next row and start resetting it all from the start
-            // return when all of the first row's columns are true.
-            bool isRowNotDone = false;
-            if (isVisited[current + 1] != null)
-            {
-                var result = ResetVisitedStations(current + 1, isVisited);
-                isRowNotDone = result.Item1;
-                if (isRowNotDone)
-                {
-                    for (int i = 0; i < isVisited[current].Length; i++)
-                        isVisited[current][i] = false;
-
-                    return new Tuple<bool, int>(true, result.Item2);
-                }
-            }
-
-            // when reaching here, im in the end of the isVisited row (at first)
-
-            // Check if row contains visited & unvisited slots
-            if (current > 0)
-            {
-                var rowNotDone = isVisited[current].Any(item => item && !item);
-                return new Tuple<bool, int>(rowNotDone, current);
-            }
-            else
-            {
-                return isVisited[current].All(visit => visit)
-                    ? new Tuple<bool, int>(true, current)
-                    : new Tuple<bool, int>(false, current); // Done
-            }
-        }
-
-        // O(n*m)
-        private StationsPathModel FindFastestRoute(List<List<StationModel>> stationsList)
-        {
-            if (stationsList.Count == 0)
-                return null;
-
-            var minTime = new TimeSpan(1, 0, 0, 0);
-            var fastestRoute = new List<StationModel>();
-
-            foreach (var station in stationsList)
-            {
-                var currentTime = new TimeSpan(0);
-                foreach (var item in station)
-                {
-                    currentTime += item.StandbyPeriod;
-                }
-                if (currentTime < minTime)
-                {
-                    fastestRoute = station;
-                    minTime = currentTime;
-                }
-            }
-
-            return new StationsPathModel(fastestRoute, minTime);
-        }
-
         // Dijakstra's algo
         public StationsPathModel FindFastestPath(int startIndex, int targetIndex)
         {
-            // How will it work:
-            // Instead of saving it all in a big array, save ONLY the minimal path (get it as a param each function call).
-            // Side note - maybe make an inner class in the graph which represents the data - understand what is needed
             if (startIndex < 0 || startIndex >= _stations.Count
-                || targetIndex <= startIndex || targetIndex >= _stations.Count)
+                || targetIndex <= 0 || targetIndex >= _stations.Count)
                 throw new ArgumentOutOfRangeException("Start index was out of the array's boundries.");
 
             StationsTable[] table = new StationsTable[_stations.Count];
             InitStationsTable(table, startIndex);
-            FillStationsTable(startIndex, targetIndex, table);
+            FillStationsTable(startIndex, table);
             return GetFastestPath(targetIndex, table);
         }
 
@@ -196,8 +71,8 @@ namespace Common.Data_Structures
             table[source].Weight = new TimeSpan(0);
         }
 
-        // O(n Log n) (recursive + decreasing inner loops)
-        private void FillStationsTable(int index, int targetIndex, StationsTable[] table)
+        // O(n Log n)
+        private void FillStationsTable(int index, StationsTable[] table)
         {
             while (table.Any(table => !table.IsVisited))
             {
@@ -214,30 +89,29 @@ namespace Common.Data_Structures
                         destTable.PrevStation = item; // Save the current station to get it's reference.
                     }
                 }
-
                 index = table.Where(t => !t.IsVisited).OrderBy(t => t.Weight).Select(t => t.StationIndex).FirstOrDefault();
             }
         }
+
         // O(n) 
         private StationsPathModel GetFastestPath(int targetIndex, StationsTable[] table)
         {
-            Stack<StationModel> pathStack = new Stack<StationModel>();
+            // Note: why do I search for the last station here and not in dijakstra?
+            // Answer: Because when I tried to convert dijakstra to work that way it began to be inefficient (it works by indexs and not objects, therefor i can only get the next station's index, not the specific object).
+            if (table[targetIndex].PrevStation == null)
+                return null;
+
             TimeSpan pathTime = new TimeSpan(0);
+            Stack<StationModel> pathStack = new Stack<StationModel>();
+            int tempIndex = targetIndex;
 
-            // Not efficient, try to chanage it.
-            TimeSpan lastStationTime = _stations[targetIndex].Min(station => station.StandbyPeriod);
-            StationModel lastStation = _stations[targetIndex].FirstOrDefault(station => station.StandbyPeriod == lastStationTime);
-
-            if (lastStation != null)
-                pathStack.Push(lastStation);
-
-            while (table[targetIndex].PrevStation != null)
+            while (table[tempIndex].PrevStation != null)
             {
-                pathStack.Push(table[targetIndex].PrevStation);
-                targetIndex = table[targetIndex].PrevStation.Number;
+                pathStack.Push(table[tempIndex].PrevStation);
+                tempIndex = table[tempIndex].PrevStation.Number;
             }
 
-            var stations = new List<StationModel>(pathStack.Count);
+            var stations = new List<StationModel>(pathStack.Count + 1); // +1 for the last station
 
             while (pathStack.Count > 0)
             {
@@ -246,7 +120,25 @@ namespace Common.Data_Structures
                 stations.Add(station);
             }
 
+            // Find the target station by minimum standby time - O(n)
+            StationModel lastStation = _stations[targetIndex].Aggregate((minTimeStation, station) =>
+            station.StandbyPeriod < (minTimeStation?.StandbyPeriod ?? station.StandbyPeriod)
+            ? station : minTimeStation);
+
+            stations.Add(lastStation);
+            pathTime += lastStation.StandbyPeriod;
+
             return new StationsPathModel(stations, pathTime);
+        }
+
+        // O(n)
+        public bool IsStationEmpty(StationModel station)
+        {
+            var currStation = _stations[station.Number].Find(x => x.CompareTo(station) == 0);
+            if (currStation == null)
+                throw new StationNotFoundException();
+
+            return currStation.CurrentFlight == null;
         }
 
         private class StationsTable
@@ -256,6 +148,5 @@ namespace Common.Data_Structures
             public TimeSpan Weight { get; set; }
             public StationModel PrevStation { get; set; }
         }
-
     }
 }

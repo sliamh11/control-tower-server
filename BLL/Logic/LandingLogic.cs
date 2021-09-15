@@ -1,5 +1,6 @@
 ﻿using BLL.Data_Objects;
 using BLL.Interfaces;
+using Common.Exceptions;
 using Common.Models;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 namespace BLL.Logic
 {
     // Instance created per request (scoped).
+    // MAKE THIS CLASS METHODS ASYNC
     internal class LandingLogic : ILandingLogic
     {
         private IStationsState _stationsState;
@@ -29,6 +31,7 @@ namespace BLL.Logic
         private bool CanFinishLanding(LandingObj landingObj)
         {
             // If current object's station is the last one / queue is empty (What will be more generic and better?) - return true.
+
             return true;
         }
         public bool FinishLanding(LandingObj landingObj)
@@ -46,22 +49,34 @@ namespace BLL.Logic
 
         private bool CanMoveToNextStation(IDataObj dataObj)
         {
-            // Get next station's index from dataObj's stations path queue.
-            // Check if station is free by checking the graph itself
-            // return true / false.
-            return true;
+            var nextStation = dataObj.StationsPath.Path[1];
+            return _stationsState.IsStationEmpty(nextStation);
         }
         public bool MoveToNextStation(IDataObj dataObj)
         {
-            if (CanMoveToNextStation(dataObj))
+            try
             {
-                // Reset current station's flight
-                // Move flight to the next in queue (pop / remove the first element).
-                // Call the StateUpdated() func.
-                // Update DB?
-                return true;
+                if (CanMoveToNextStation(dataObj))
+                {
+                    // Reset current station's flight (need to make a function - LeaveStation())
+                    // Find fastest route from the next station to the target - with overrided FindFastestPath func (accepts objects)
+                    // Call the StateUpdated() func.
+                    // Update DB?
+                    return true;
+                }
+                return false;
             }
-            return false;
+            catch (StationNotFoundException ex)
+            {
+                var currStation = dataObj.StationsPath.CurrentStation;
+                int targetIndex = dataObj.StationsPath.Path.Count - 1;
+                var targetStation = dataObj.StationsPath.Path[targetIndex];
+                // Make an override function for FindFastestPath which accepts StationModels as params instead of integers (to know the exact stations)
+                dataObj.StationsPath = _stationsState.FindFastestPath(currStation, targetStation);
+                MoveToNextStation(dataObj);
+            }
+
+            // Other exceptions will be cought in the service?
         }
 
         public DateTime CalcEndTime(StationsPathModel path)

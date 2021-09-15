@@ -22,7 +22,6 @@ namespace BLL
             LoadStations();
         }
 
-
         private void LoadStations()
         {
             // Waiting stations
@@ -62,6 +61,22 @@ namespace BLL
             lock (_stationsLock)
             {
                 _stations.AddStation(newStation);
+            }
+        }
+
+        public bool IsStationEmpty(StationModel station)
+        {
+            lock (_stationsLock)
+            {
+                return _stations.IsStationEmpty(station);
+            }
+        }
+
+        public StationsPathModel FindFastestPath(int startIndex, int targetIndex)
+        {
+            lock (_stationsLock)
+            {
+                return _stations.FindFastestPath(startIndex, targetIndex);
             }
         }
 

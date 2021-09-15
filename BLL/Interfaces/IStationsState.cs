@@ -9,5 +9,8 @@ namespace BLL.Interfaces
         void StateUpdated();
         IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState();
         void AddStation(List<StationModel> newStation);
+        bool IsStationEmpty(StationModel station);
+        StationsPathModel FindFastestPath(int startIndex, int targetIndex);
+        StationsPathModel FindFastestPath(StationModel currStation, StationModel targetStation);
     }
 }
