@@ -19,6 +19,8 @@ namespace BLL.Logic
         {
             // Already after landing approval
             // Get the stations path from the graph
+            // var startingStation = _stationsState.GetStartingStation
+            //LandingObj = _stationsState.FindFastestPath()
             // Set finalized time in FlightModel with 'CalcEndTime(...)'.
             // Set FlightModel as the flight at the right graph index.
             throw new NotImplementedException();

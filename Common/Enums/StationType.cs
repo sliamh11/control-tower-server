@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Common.Enums
+﻿namespace Common.Enums
 {
-    // Represents the specific type of the station - can I start a landing / departure proccess from it? Is it a combined station?
+    // Represents the specific type of the station
     public enum StationType
     {
         Normal,
-        Combined,
+        LandingExit,
         Landing,
         Departure,
-        Runway
+        Runway 
     }
 }

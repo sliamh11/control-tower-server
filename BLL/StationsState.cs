@@ -15,6 +15,8 @@ namespace BLL
     {
         private readonly StationsGraph _stations;
         private readonly object _stationsLock = new object();
+        private readonly object _getLandingLock = new object();
+        private readonly object _getDepartureLock = new object();
 
         public StationsState()
         {
@@ -96,7 +98,40 @@ namespace BLL
             }
         }
 
+        public StationModel GetLandingStation()
+        {
+            // If returns null - no available station for now -> put in queue or something.
+            lock (_getLandingLock)
+            {
+                return _stations.GetLandingStation();
+            }
+        }
 
+        public StationModel GetDepartureStation()
+        {
+            // If returns null - no available station for now -> put in queue or something.
+            lock (_getDepartureLock)
+            {
+                return _stations.GetDepartureStation();
+            }
+        }
+
+        public Tuple<StationModel, StationModel> GetPathEdgeStations(FlightModel flight)
+        {
+            if (flight.Type == FlightType.Landing)
+            {
+                lock (_getLandingLock)
+                    return _stations.GetLandingEdgeStations();
+            }
+
+            if (flight.Type == FlightType.Departure)
+            {
+                lock (_getDepartureLock)
+                    return _stations.GetDepartureEdgeStations();
+            }
+
+            return null;
+        }
         //public bool UpdateStation(int index, object updatedStation)
         //{
         //    lock (_stationsLock)

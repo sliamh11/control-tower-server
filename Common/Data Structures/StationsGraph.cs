@@ -1,4 +1,5 @@
-﻿using Common.Exceptions;
+﻿using Common.Enums;
+using Common.Exceptions;
 using Common.Models;
 using System;
 using System.Collections.Generic;
@@ -14,23 +15,64 @@ namespace Common.Data_Structures
         // 3. Can access directly by index with O(1).
 
         private readonly List<List<StationModel>> _stations;
+        private LinkedList<StationModel> _startLandingStations;
+        private LinkedList<StationModel> _startDepartureStations;
+        private LinkedList<StationModel> _endLandingStations;
+        private LinkedList<StationModel> _endDepartureStations;
 
         public StationsGraph()
         {
-            // Base size will be 15 (instead of 4 in meta-deta -> increases performance slightly).
-            _stations = new List<List<StationModel>>(15);
+            _stations = new List<List<StationModel>>(15); // Base size will be 15 (instead of 4 in meta-deta -> less array-overriding)
+            _startLandingStations = new LinkedList<StationModel>();
+            _startDepartureStations = new LinkedList<StationModel>();
+            _endLandingStations = new LinkedList<StationModel>();
+            _endDepartureStations = new LinkedList<StationModel>();
         }
 
-        // Add LandingStationsList & DepartureStationsList and save specific spots to make it easier and faster later on.
-        public void AddStation(List<StationModel> station) => _stations.Add(station);
-
         public IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState() => _stations;
+
+        // Add LandingStationsList & DepartureStationsList and save specific spots to make it easier and faster later on.
+        public void AddStation(List<StationModel> station)
+        {
+            _stations.Add(station);
+            foreach (var item in station)
+            {
+                if (item.Type == StationType.Landing)
+                    _startLandingStations.AddLast(item);
+                else if (item.Type == StationType.Departure)
+                    _startDepartureStations.AddLast(item);
+            }
+        }
+
+        // O(n)
+        public Tuple<StationModel, StationModel> GetLandingEdgeStations()
+        {
+            var startingPoint = GetFastestStation(_startLandingStations, true);
+            var endingPoint = GetFastestStation(_endLandingStations);
+            return new Tuple<StationModel, StationModel>(startingPoint, endingPoint);
+        }
+        // O(n)
+        public Tuple<StationModel, StationModel> GetDepartureEdgeStations()
+        {
+            var startingPoint = GetFastestStation(_startDepartureStations, true);
+            var endingPoint = GetFastestStation(_endDepartureStations);
+            return new Tuple<StationModel, StationModel>(startingPoint, endingPoint);
+        }
+
+        // O(n)
+        private StationModel GetFastestStation(IEnumerable<StationModel> stations, bool isAvailableStation = false)
+        {
+            return stations.Aggregate((minStandbyStation, station) =>
+            station.StandbyPeriod < (minStandbyStation?.StandbyPeriod ?? station.StandbyPeriod) // with the least standby time
+            && (isAvailableStation ? station.CurrentFlight == null : true) // and has no current flight in it
+            ? station : minStandbyStation);
+        }
 
         // O(n)
         public bool UpdateStation(StationModel updatedStation)
         {
             var station = _stations[updatedStation.Number];
-            int index = station.IndexOf(updatedStation); // Compares with .Equals() (supposes to work on ref)
+            int index = station.IndexOf(updatedStation); // Compares with .Equals() (Checks station's content)
             //int index = station.FindIndex(station => station.CompareTo(updatedStation) == 0);
             if (index >= 0)
             {
@@ -152,8 +194,8 @@ namespace Common.Data_Structures
             if (fromStation == null || toStation == null)
                 throw new StationNotFoundException();
 
-            var startStation = _stations[fromStation.Number].Find(x => x.CompareTo(fromStation) == 0);
-            var targetStation = _stations[toStation.Number].Find(x => x.CompareTo(toStation) == 0);
+            var startStation = _stations[fromStation.Number].Find(x => x == fromStation);
+            var targetStation = _stations[toStation.Number].Find(x => x == toStation);
 
             if (startStation == null || targetStation == null)
                 throw new StationNotFoundException();
@@ -193,9 +235,7 @@ namespace Common.Data_Structures
             }
 
             // Find the target station by minimum standby time - O(n)
-            StationModel lastStation = _stations[targetIndex].Aggregate((minTimeStation, station) =>
-            station.StandbyPeriod < (minTimeStation?.StandbyPeriod ?? station.StandbyPeriod)
-            ? station : minTimeStation);
+            StationModel lastStation = GetFastestStation(_stations[targetIndex]);
 
             stations.Add(lastStation);
             pathTime += lastStation.StandbyPeriod;
@@ -206,7 +246,7 @@ namespace Common.Data_Structures
         // O(n)
         public bool IsStationEmpty(StationModel station)
         {
-            var currStation = _stations[station.Number].Find(x => x.CompareTo(station) == 0);
+            var currStation = _stations[station.Number].Find(x => x == station);
             if (currStation == null)
                 throw new StationNotFoundException();
 

@@ -1,5 +1,6 @@
 ﻿using Common.Enums;
 using System;
+using System.Collections.Generic;
 
 namespace Common.Models
 {
@@ -21,9 +22,8 @@ namespace Common.Models
 
         public int CompareTo(StationModel other)
         {
-            return Number.CompareTo(other.Number)
-                + NextStation.CompareTo(other.NextStation)
-                + Type.CompareTo(other.Type);
+            // If result = 0 -> stations are the same. no such thing bigger / smaller station.
+            return StandbyPeriod.CompareTo(other.StandbyPeriod);
         }
     }
 }
