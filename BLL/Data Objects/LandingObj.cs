@@ -31,11 +31,22 @@ namespace BLL.Data_Objects
 
         public LandingObj(string flightId)
         {
+            InitLanding(flightId);
+        }
+
+        private void InitLanding(string flightId)
+        {
             Flight = new FlightModel(flightId, FlightType.Landing);
-            StationsPath = _logic?.StartLanding(this);
-            _dueTime = new TimeSpan(0);
-            _periodTime = StationsPath.CurrentStation.StandbyPeriod;
-            _timer = new Timer(OnTimerElapsed, null, _dueTime, _periodTime);
+            if (_logic.StartLanding(this))
+            {
+                _dueTime = new TimeSpan(0);
+                _periodTime = StationsPath.CurrentStation.StandbyPeriod;
+                _timer = new Timer(OnTimerElapsed, null, _dueTime, _periodTime);
+            }
+            else
+            {
+                // Add to TowerManager Landing Queue
+            }
         }
 
         // Add setter for estimated landing time (with the time from StationsModelPath)

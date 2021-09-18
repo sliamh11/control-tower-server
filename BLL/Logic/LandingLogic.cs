@@ -15,20 +15,29 @@ namespace BLL.Logic
         {
             _stationsState = stationsState;
         }
-        public StationsPathModel StartLanding(LandingObj landingObj)
+
+        public bool StartLanding(LandingObj landingObj)
         {
-            // Already after landing approval
-            // Get the stations path from the graph
-            // var startingStation = _stationsState.GetStartingStation
-            //LandingObj = _stationsState.FindFastestPath()
-            // Set finalized time in FlightModel with 'CalcEndTime(...)'.
-            // Set FlightModel as the flight at the right graph index.
-            throw new NotImplementedException();
+            // 'Fastest' start & end points (by StandbyPeriod)
+            var pathEdges = _stationsState.GetPathEdgeStations(landingObj.Flight);
+            if (pathEdges == null)
+                return false;
+
+            // Fastest path between the points
+            var path = _stationsState.FindFastestPath(pathEdges.Item1, pathEdges.Item2);
+            if (path == null)
+                return false;
+
+            landingObj.StationsPath = path;
+            landingObj.Flight.LandingTime = DateTime.Now + landingObj.StationsPath.OverallTime;
+            _stationsState.MoveToStation(null, pathEdges.Item1, landingObj.Flight);
+            return true;
         }
 
         private bool CanFinishLanding(LandingObj landingObj)
         {
             // If current object's station is the last one / queue is empty (What will be more generic and better?) - return true.
+            if(landingObj.StationsPath.CurrentStation)
 
             return true;
         }

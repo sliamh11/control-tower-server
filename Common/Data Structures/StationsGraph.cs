@@ -37,10 +37,23 @@ namespace Common.Data_Structures
             _stations.Add(station);
             foreach (var item in station)
             {
-                if (item.Type == StationType.Landing)
-                    _startLandingStations.AddLast(item);
-                else if (item.Type == StationType.Departure)
-                    _startDepartureStations.AddLast(item);
+                switch (item.Type)
+                {
+                    case StationType.LandingExit:
+                        _endLandingStations.AddLast(item);
+                        break;
+                    case StationType.Landing:
+                        _startLandingStations.AddLast(item);
+                        break;
+                    case StationType.Departure:
+                        _startDepartureStations.AddLast(item);
+                        break;
+                    case StationType.Runway:
+                        _endDepartureStations.AddLast(item);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
@@ -49,14 +62,20 @@ namespace Common.Data_Structures
         {
             var startingPoint = GetFastestStation(_startLandingStations, true);
             var endingPoint = GetFastestStation(_endLandingStations);
-            return new Tuple<StationModel, StationModel>(startingPoint, endingPoint);
+
+            return startingPoint == null || endingPoint == null
+                ? null
+                : new Tuple<StationModel, StationModel>(startingPoint, endingPoint);
         }
         // O(n)
         public Tuple<StationModel, StationModel> GetDepartureEdgeStations()
         {
             var startingPoint = GetFastestStation(_startDepartureStations, true);
             var endingPoint = GetFastestStation(_endDepartureStations);
-            return new Tuple<StationModel, StationModel>(startingPoint, endingPoint);
+
+            return startingPoint == null || endingPoint == null
+                ? null
+                : new Tuple<StationModel, StationModel>(startingPoint, endingPoint);
         }
 
         // O(n)
@@ -191,7 +210,22 @@ namespace Common.Data_Structures
         // O(n)
         public void MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight)
         {
-            if (fromStation == null || toStation == null)
+            if (toStation == null)
+                throw new StationNotFoundException();
+
+            // In case of Starting a landing / departure process.
+            if (fromStation == null && toStation != null)
+            {
+                var station = _stations[toStation.Number].Find(x => x == toStation);
+                if (station == null)
+                    throw new StationNotFoundException();
+
+                station.CurrentFlight = flight;
+                return;
+            }
+
+            // At this point, fromStation must have a value.
+            if (fromStation == null)
                 throw new StationNotFoundException();
 
             var startStation = _stations[fromStation.Number].Find(x => x == fromStation);
