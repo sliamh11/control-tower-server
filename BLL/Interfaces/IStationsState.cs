@@ -1,5 +1,4 @@
-﻿using Common.Data_Structures;
-using Common.Models;
+﻿using Common.Models;
 using System;
 using System.Collections.Generic;
 
@@ -15,5 +14,6 @@ namespace BLL.Interfaces
         StationsPathModel FindFastestPath(StationModel currStation, StationModel targetStation);
         void MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight);
         Tuple<StationModel, StationModel> GetPathEdgeStations(FlightModel flight);
+        void RemoveFlight(StationModel station);
     }
 }

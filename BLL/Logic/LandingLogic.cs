@@ -1,7 +1,6 @@
 ﻿using BLL.Data_Objects;
 using BLL.Interfaces;
 using Common.Exceptions;
-using Common.Models;
 using System;
 
 namespace BLL.Logic
@@ -36,16 +35,13 @@ namespace BLL.Logic
 
         private bool CanFinishLanding(LandingObj landingObj)
         {
-            // If current object's station is the last one / queue is empty (What will be more generic and better?) - return true.
-            if(landingObj.StationsPath.CurrentStation)
-
-            return true;
+            return landingObj.StationsPath.CurrentStation == landingObj.StationsPath.Path.Last.Value;
         }
         public bool FinishLanding(LandingObj landingObj)
         {
             if (CanFinishLanding(landingObj))
             {
-                // Remove the flight from the station
+                _stationsState.RemoveFlight(landingObj.StationsPath.CurrentStation);
                 // send _stationsState.StateUpdated();
                 // Update DB?
                 return true;
@@ -56,21 +52,21 @@ namespace BLL.Logic
 
         private bool CanMoveToNextStation(IDataObj dataObj)
         {
-            var nextStation = dataObj.StationsPath.Path[1];
+            var nextStation = dataObj.StationsPath.Path.First.Next.Value;
             return _stationsState.IsStationEmpty(nextStation);
         }
         public bool MoveToNextStation(IDataObj dataObj)
         {
             var currStation = dataObj.StationsPath.CurrentStation;
-            int targetIndex = dataObj.StationsPath.Path.Count - 1;
-            var targetStation = dataObj.StationsPath.Path[targetIndex];
+            var targetStation = dataObj.StationsPath.Path.Last.Value;
             try
             {
                 if (CanMoveToNextStation(dataObj))
                 {
-                    var nextStation = dataObj.StationsPath.Path[1];
+                    var nextStation = dataObj.StationsPath.Path.First.Next.Value;
                     _stationsState.FindFastestPath(nextStation, targetStation);
                     _stationsState.MoveToStation(currStation, nextStation, dataObj.Flight); // Activated only when found a valid path from the next station.
+                    dataObj.StationsPath.Path.RemoveFirst(); // Remove only when action succeeded.
 
                     // Call the StateUpdated() func.
                     // Update DB?

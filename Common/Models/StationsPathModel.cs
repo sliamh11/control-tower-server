@@ -5,14 +5,14 @@ namespace Common.Models
 {
     public class StationsPathModel
     {
-        public IReadOnlyList<StationModel> Path { get; set; }
+        public LinkedList<StationModel> Path { get; set; }
         public StationModel CurrentStation { get; set; }
         public TimeSpan OverallTime { get; set; }
 
-        public StationsPathModel(IReadOnlyList<StationModel> stationsPath, TimeSpan time)
+        public StationsPathModel(LinkedList<StationModel> stationsPath, TimeSpan time)
         {
             Path = stationsPath;
-            CurrentStation = Path[0];
+            CurrentStation = Path.First.Value;
             OverallTime = time;
         }
     }

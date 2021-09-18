@@ -58,6 +58,12 @@ namespace Common.Data_Structures
         }
 
         // O(n)
+        public void RemoveFlight(StationModel station)
+        {
+            _stations[station.Number].Find(x => x == station).CurrentFlight = null;
+        }
+
+        // O(n)
         public Tuple<StationModel, StationModel> GetLandingEdgeStations()
         {
             var startingPoint = GetFastestStation(_startLandingStations, true);
@@ -67,6 +73,7 @@ namespace Common.Data_Structures
                 ? null
                 : new Tuple<StationModel, StationModel>(startingPoint, endingPoint);
         }
+
         // O(n)
         public Tuple<StationModel, StationModel> GetDepartureEdgeStations()
         {
@@ -259,19 +266,19 @@ namespace Common.Data_Structures
                 tempIndex = table[tempIndex].PrevStation.Number;
             }
 
-            var stations = new List<StationModel>(pathStack.Count + 1); // +1 for the last station
+            var stations = new LinkedList<StationModel>();
 
             while (pathStack.Count > 0)
             {
                 var station = pathStack.Pop();
                 pathTime += station.StandbyPeriod;
-                stations.Add(station);
+                stations.AddLast(station);
             }
 
             // Find the target station by minimum standby time - O(n)
             StationModel lastStation = GetFastestStation(_stations[targetIndex]);
 
-            stations.Add(lastStation);
+            stations.AddLast(lastStation);
             pathTime += lastStation.StandbyPeriod;
 
             return new StationsPathModel(stations, pathTime);

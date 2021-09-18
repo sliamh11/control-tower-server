@@ -14,7 +14,7 @@ namespace BLL
     public class StationsState : IStationsState
     {
         private readonly StationsGraph _stations;
-        private readonly object _stationsLock = new object();
+        private readonly object _stationsLock = new object(); // For working with the data structure itself
         private readonly object _getLandingLock = new object();
         private readonly object _getDepartureLock = new object();
 
@@ -114,6 +114,14 @@ namespace BLL
             }
 
             return null;
+        }
+
+        public void RemoveFlight(StationModel station)
+        {
+            lock (_stationsLock)
+            {
+                _stations.RemoveFlight(station);
+            }
         }
 
         //public bool UpdateStation(int index, object updatedStation)
