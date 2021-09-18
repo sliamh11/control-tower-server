@@ -4,9 +4,6 @@ using Common.Enums;
 using Common.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BLL
 {
@@ -15,6 +12,7 @@ namespace BLL
     {
         private readonly StationsGraph _stations;
         private readonly object _stationsLock = new object(); // For working with the data structure itself
+        private readonly object _stateLock = new object(); // For state updates, etc.
         private readonly object _getLandingLock = new object();
         private readonly object _getDepartureLock = new object();
 
@@ -36,8 +34,10 @@ namespace BLL
             AddStation(new List<StationModel>(new StationModel[] {
                 new StationModel(4, 5, new TimeSpan(0, 0, 45)),
                 new StationModel(4, 6, new TimeSpan(0, 0, 45)) }));
-            AddStation(new List<StationModel>(new StationModel[] { new StationModel(5, 7, new TimeSpan(0, 1, 0), StationType.Combined) }));// Also has an exit
-            AddStation(new List<StationModel>(new StationModel[] { new StationModel(6, 7, new TimeSpan(0, 1, 0), StationType.Combined) }));// Also has an exit
+            AddStation(new List<StationModel>(new StationModel[] { new StationModel(5, 7, new TimeSpan(0, 1, 0),
+                StationType.LandingExit, StationType.Departure) }));// Also has an exit
+            AddStation(new List<StationModel>(new StationModel[] { new StationModel(6, 7, new TimeSpan(0, 1, 0),
+                StationType.LandingExit, StationType.Departure) }));// Also has an exit
             AddStation(new List<StationModel>(new StationModel[] { new StationModel(7, 3, new TimeSpan(0, 0, 35)) })); // Station before runway.
         }
 

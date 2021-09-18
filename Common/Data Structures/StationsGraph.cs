@@ -35,24 +35,28 @@ namespace Common.Data_Structures
         public void AddStation(List<StationModel> station)
         {
             _stations.Add(station);
+            // Add the relevant stations to the relevant lists
             foreach (var item in station)
             {
-                switch (item.Type)
+                foreach (var type in item.Types)
                 {
-                    case StationType.LandingExit:
-                        _endLandingStations.AddLast(item);
-                        break;
-                    case StationType.Landing:
-                        _startLandingStations.AddLast(item);
-                        break;
-                    case StationType.Departure:
-                        _startDepartureStations.AddLast(item);
-                        break;
-                    case StationType.Runway:
-                        _endDepartureStations.AddLast(item);
-                        break;
-                    default:
-                        break;
+                    switch (type)
+                    {
+                        case StationType.LandingExit:
+                            _endLandingStations.AddLast(item);
+                            break;
+                        case StationType.Landing:
+                            _startLandingStations.AddLast(item);
+                            break;
+                        case StationType.Departure:
+                            _startDepartureStations.AddLast(item);
+                            break;
+                        case StationType.Runway:
+                            _endDepartureStations.AddLast(item);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
