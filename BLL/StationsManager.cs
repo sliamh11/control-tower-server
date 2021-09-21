@@ -4,7 +4,6 @@ using Common.Enums;
 using Common.Models;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace BLL
 {
@@ -18,7 +17,8 @@ namespace BLL
 
         public void AddStation(List<StationModel> newStation)
         {
-            throw new NotImplementedException();
+            // Side Note: Does the format validation happens here or in the service? 
+            _stationsState.AddStation(newStation);
         }
 
         public IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState() => _stationsState.GetStationsState();
@@ -27,9 +27,7 @@ namespace BLL
         {
             if (CanAddFlight(FlightType.Departure))
             {
-                // Task.Run(new DepartureObj...)
-                //var departureObj = new DepartureObj(flightId);
-                //Task.Factory.StartNew(() => departureObj.OnTimerElapsed)
+                _ = new DepartureObj(flightId); // Works on another thread with a timer
                 return true;
             }
             return false;
@@ -41,9 +39,7 @@ namespace BLL
         {
             if (CanAddFlight(FlightType.Landing))
             {
-                // Task.Run(new LandingObj...)
-                _ = new LandingObj(flightId); // Should start the timer off and dont need to do anything else. (timers works on different threads?)
-                //Task.Factory.StartNew(() => new LandingObj(flightId));
+                _ = new LandingObj(flightId); // Works on another thread with a timer
                 return true;
             }
             return false;

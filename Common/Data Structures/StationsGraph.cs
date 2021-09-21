@@ -163,7 +163,7 @@ namespace Common.Data_Structures
                     StationIndex = i,
                     PrevStation = null,
                     IsVisited = false,
-                    Weight = TimeSpan.MaxValue // 1 Day as max value.
+                    Weight = new TimeSpan(1, 0, 0, 0)// 1 Day as max value.
                 };
             }
             table[startIndex].Weight = new TimeSpan(0);

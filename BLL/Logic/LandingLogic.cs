@@ -52,9 +52,13 @@ namespace BLL.Logic
 
         private bool CanMoveToNextStation(IDataObj dataObj)
         {
-            var nextStation = dataObj.StationsPath.Path.First.Next.Value;
+            var nextStation = dataObj.StationsPath.Path.First.Next?.Value;
+            if (nextStation == null)
+                throw new StationNotFoundException();
+
             return _stationsState.IsStationEmpty(nextStation);
         }
+
         public bool MoveToNextStation(IDataObj dataObj)
         {
             var currStation = dataObj.StationsPath.CurrentStation;
@@ -65,8 +69,9 @@ namespace BLL.Logic
                 {
                     var nextStation = dataObj.StationsPath.Path.First.Next.Value;
                     _stationsState.FindFastestPath(nextStation, targetStation);
-                    _stationsState.MoveToStation(currStation, nextStation, dataObj.Flight); // Activated only when found a valid path from the next station.
-                    dataObj.StationsPath.Path.RemoveFirst(); // Remove only when action succeeded.
+                    _stationsState.MoveToStation(currStation, nextStation, dataObj.Flight);
+                    dataObj.StationsPath.Path.RemoveFirst(); // Remove old station
+                    dataObj.StationsPath.CurrentStation = nextStation; // Update the current station.
 
                     // Call the StateUpdated() func.
                     // Update DB?

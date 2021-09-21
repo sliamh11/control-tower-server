@@ -16,18 +16,38 @@ namespace Services.Controllers
             _manager = manager;
         }
 
-        public IActionResult Index()
+        public IActionResult Index() => Ok("In tower controller");
+
+        [Route("start-departure/{flightId}")]
+        public IActionResult StartDeparture(string flightId)
         {
-            return Ok("In tower controller");
+            try
+            {
+                if (_manager.StartDeparture(flightId))
+                    return Ok($"Flight: {flightId} Started departure proccess.");
+
+                return Ok("Departure entered to queue.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Exception: {ex.Message}");
+            }
         }
 
         [Route("start-landing/{flightId}")]
         public IActionResult StartLanding(string flightId)
         {
-            if (_manager.StartLanding(flightId))
-                return Ok($"Flight: {flightId} Started landing proccess.");
+            try
+            {
+                if (_manager.StartLanding(flightId))
+                    return Ok($"Flight: {flightId} Started landing proccess.");
 
-            return Ok($"Landing failed.");
+                return BadRequest($"Landing entered to queue.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Exception: {ex.Message}");
+            }
         }
     }
 }

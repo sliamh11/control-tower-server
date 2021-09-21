@@ -3,13 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLL", "BLL\BLL.csproj", "{6D2D5A7D-377F-41C7-B519-4FADF3665F9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BLL", "BLL\BLL.csproj", "{6D2D5A7D-377F-41C7-B519-4FADF3665F9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Services\Services.csproj", "{B60F1FCB-0288-4FED-B882-9F922D2079B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services", "Services\Services.csproj", "{B60F1FCB-0288-4FED-B882-9F922D2079B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{11D0EF4F-AE59-4C68-AAB8-F5EB0E04DFB4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTests", "Console\ConsoleTests.csproj", "{48310280-6061-404F-B887-95E54B379C4A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{11D0EF4F-AE59-4C68-AAB8-F5EB0E04DFB4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +27,6 @@ Global
 		{11D0EF4F-AE59-4C68-AAB8-F5EB0E04DFB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11D0EF4F-AE59-4C68-AAB8-F5EB0E04DFB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11D0EF4F-AE59-4C68-AAB8-F5EB0E04DFB4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{48310280-6061-404F-B887-95E54B379C4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{48310280-6061-404F-B887-95E54B379C4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{48310280-6061-404F-B887-95E54B379C4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{48310280-6061-404F-B887-95E54B379C4A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

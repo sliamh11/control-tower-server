@@ -3,7 +3,7 @@ using BLL.Logic;
 using Common.Enums;
 using Common.Models;
 using System;
-using System.ComponentModel;
+using System.Diagnostics;
 using System.Threading;
 
 namespace BLL.Data_Objects
@@ -15,7 +15,6 @@ namespace BLL.Data_Objects
         private Timer _timer;
         private TimeSpan _dueTime;
         private TimeSpan _periodTime;
-        //private BackgroundWorker worker;
         #endregion
 
         #region Public Properties
@@ -35,8 +34,9 @@ namespace BLL.Data_Objects
             Flight = new FlightModel(flightId, FlightType.Landing);
             if (_logic.StartLanding(this))
             {
-                _dueTime = new TimeSpan(0);
-                _periodTime = StationsPath.CurrentStation.StandbyPeriod;
+                //_dueTime = StationsPath.CurrentStation.StandbyPeriod;
+                _dueTime = new TimeSpan(0, 0, 10);
+                _periodTime = new TimeSpan(0);
                 _timer = new Timer(OnTimerElapsed, null, _dueTime, _periodTime);
                 //worker = new BackgroundWorker();
                 //worker.DoWork += (s,e) => InitTimer;
@@ -54,21 +54,28 @@ namespace BLL.Data_Objects
         //    _timer = new Timer(OnTimerElapsed, null, _dueTime, _periodTime);
         //}
 
-        // Add setter for estimated landing time (with the time from StationsModelPath)
+
+
         private void OnTimerElapsed(object state)
         {
+            //Program.WriteToConsole($"Flight: {Flight.Id}, Station: {StationsPath.CurrentStation.Number}");
+            Debug.WriteLine($"Flight: {Flight.Id}, Station: {StationsPath.CurrentStation.Number}");
+            // Add setter for estimated landing time (with the time from StationsModelPath)
+            // Add try catch for StationNotFoundException and other exceptions.
+
             if (_logic.FinishLanding(this))
             {
+                Debug.WriteLine($"Flight {Flight.Id} has landed.");
                 _timer.Dispose();
                 return;
             }
 
-
             if (_logic.MoveToNextStation(this))
             {
+                Debug.WriteLine($"FLight {Flight.Id} moved to station {StationsPath.CurrentStation.Number}");
                 // Update the _periodTime to the station's StandbyTime.
                 _periodTime = StationsPath.CurrentStation.StandbyPeriod;
-                _timer.Change(new TimeSpan(0), _periodTime);
+                _timer.Change(new TimeSpan(0, 0, 10), new TimeSpan(0));
             }
             else
             {
