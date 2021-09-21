@@ -7,12 +7,12 @@ namespace BLL.Logic
 {
     // Instance created per request (scoped).
     // MAKE THIS CLASS METHODS ASYNC
-    internal class LandingLogic : ILandingLogic
+    public class LandingLogic : ILandingLogic
     {
         private IStationsState _stationsState;
-        public LandingLogic(IStationsState stationsState)
+        public LandingLogic()
         {
-            _stationsState = stationsState;
+            _stationsState = StationsState.Instance;
         }
 
         public bool StartLanding(LandingObj landingObj)

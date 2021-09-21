@@ -1,6 +1,6 @@
 ﻿namespace BLL.Interfaces
 {
-    internal interface IStationsLogic
+    public interface IStationsLogic
     {
         bool MoveToNextStation(IDataObj dataObj);
     }

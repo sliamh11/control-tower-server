@@ -1,22 +1,21 @@
 ﻿using BLL.Interfaces;
+using BLL.Logic;
 using Common.Enums;
 using Common.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.ComponentModel;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace BLL.Data_Objects
 {
-    internal class LandingObj : IDataObj
+    public class LandingObj : IDataObj
     {
         #region Private Fields
         private ILandingLogic _logic;
         private Timer _timer;
         private TimeSpan _dueTime;
         private TimeSpan _periodTime;
+        //private BackgroundWorker worker;
         #endregion
 
         #region Public Properties
@@ -24,13 +23,10 @@ namespace BLL.Data_Objects
         public StationsPathModel StationsPath { get; set; }
         #endregion
 
-        public LandingObj(ILandingLogic landingLogic)
-        {
-            _logic = landingLogic;
-        }
-
         public LandingObj(string flightId)
         {
+
+            _logic = new LandingLogic();
             InitLanding(flightId);
         }
 
@@ -42,12 +38,21 @@ namespace BLL.Data_Objects
                 _dueTime = new TimeSpan(0);
                 _periodTime = StationsPath.CurrentStation.StandbyPeriod;
                 _timer = new Timer(OnTimerElapsed, null, _dueTime, _periodTime);
+                //worker = new BackgroundWorker();
+                //worker.DoWork += (s,e) => InitTimer;
             }
             else
             {
                 // Add to TowerManager Landing Queue
             }
         }
+
+        //private void InitTimer()
+        //{
+        //    _dueTime = new TimeSpan(0);
+        //    _periodTime = StationsPath.CurrentStation.StandbyPeriod;
+        //    _timer = new Timer(OnTimerElapsed, null, _dueTime, _periodTime);
+        //}
 
         // Add setter for estimated landing time (with the time from StationsModelPath)
         private void OnTimerElapsed(object state)

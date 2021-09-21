@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BLL.Interfaces
 {
-    internal interface IDataObj
+    public interface IDataObj
     {
         public FlightModel Flight { get; set; }
         public StationsPathModel StationsPath { get; set; }

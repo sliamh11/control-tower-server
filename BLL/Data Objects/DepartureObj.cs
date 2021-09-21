@@ -1,15 +1,10 @@
 ﻿using BLL.Interfaces;
 using Common.Enums;
 using Common.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BLL.Data_Objects
 {
-    internal class DepartureObj : IDataObj
+    public class DepartureObj : IDataObj
     {
         private IDepartureLogic _logic;
         public FlightModel Flight { get; set; }

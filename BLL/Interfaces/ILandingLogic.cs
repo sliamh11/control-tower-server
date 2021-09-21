@@ -3,7 +3,7 @@ using Common.Models;
 
 namespace BLL.Interfaces
 {
-    internal interface ILandingLogic : IStationsLogic
+    public interface ILandingLogic : IStationsLogic
     {
         bool StartLanding(LandingObj landingObj);
         bool FinishLanding(LandingObj landingObj);

@@ -5,12 +5,12 @@ using System;
 
 namespace BLL.Logic
 {
-    internal class DepartureLogic : IDepartureLogic
+    public class DepartureLogic : IDepartureLogic
     {
         private IStationsState _stationsState;
-        public DepartureLogic(IStationsState stationsState)
+        public DepartureLogic()
         {
-            _stationsState = stationsState;
+            _stationsState = StationsState.Instance;
         }
 
         public StationsPathModel StartDeparture(DepartureObj departureObj)

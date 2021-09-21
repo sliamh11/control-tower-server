@@ -112,6 +112,18 @@ namespace Common.Data_Structures
             return false;
         }
 
+        // O(n) -> Check if possible for a flight to join to it's relevant path
+        public bool CanAddFlight(FlightType type)
+        {
+            var list = type == FlightType.Departure ? _startDepartureStations : _startLandingStations;
+            foreach (var item in list)
+            {
+                if (item.CurrentFlight == null)
+                    return true;
+            }
+            return false;
+        }
+
         // Dijakstra's algo
         public StationsPathModel FindFastestPath(int startIndex, int targetIndex)
         {

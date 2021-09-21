@@ -7,19 +7,35 @@ using System.Collections.Generic;
 
 namespace BLL
 {
-    // Holds the Data Structure.
+    // Holds the Data Structure in a Singleton instance.
     public class StationsState : IStationsState
     {
+        private static StationsState _instance;
         private readonly StationsGraph _stations;
         private readonly object _stationsLock = new object(); // For working with the data structure itself
         private readonly object _stateLock = new object(); // For state updates, etc.
+        private static readonly object _initLock = new object();
         private readonly object _getLandingLock = new object();
         private readonly object _getDepartureLock = new object();
 
-        public StationsState()
+        private StationsState()
         {
             _stations = new StationsGraph();
             LoadStations();
+        }
+
+        public static StationsState Instance
+        {
+            get
+            {
+                lock (_initLock)
+                {
+                    if (_instance == null)
+                        _instance = new StationsState();
+
+                    return _instance;
+                }
+            }
         }
 
         private void LoadStations()
@@ -122,6 +138,16 @@ namespace BLL
             {
                 _stations.RemoveFlight(station);
             }
+        }
+
+        public bool CanAddFlight(FlightType type)
+        {
+            if (type == FlightType.Departure)
+                lock (_getDepartureLock)
+                    return _stations.CanAddFlight(type);
+
+            lock (_getLandingLock)
+                return _stations.CanAddFlight(type);
         }
 
         //public bool UpdateStation(int index, object updatedStation)

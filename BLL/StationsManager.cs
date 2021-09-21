@@ -1,17 +1,19 @@
-﻿using BLL.Interfaces;
-using Common.Data_Structures;
+﻿using BLL.Data_Objects;
+using BLL.Interfaces;
+using Common.Enums;
 using Common.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BLL
 {
     public class StationsManager : IStationsManager
     {
         private IStationsState _stationsState;
-        public StationsManager(IStationsState stationsState)
+        public StationsManager()
         {
-            _stationsState = stationsState;
+            _stationsState = StationsState.Instance;
         }
 
         public void AddStation(List<StationModel> newStation)
@@ -23,9 +25,11 @@ namespace BLL
 
         public bool StartDeparture(string flightId)
         {
-            if (CanStartDeparture())
+            if (CanAddFlight(FlightType.Departure))
             {
                 // Task.Run(new DepartureObj...)
+                //var departureObj = new DepartureObj(flightId);
+                //Task.Factory.StartNew(() => departureObj.OnTimerElapsed)
                 return true;
             }
             return false;
@@ -35,9 +39,11 @@ namespace BLL
 
         public bool StartLanding(string flightId)
         {
-            if (CanStartLanding())
+            if (CanAddFlight(FlightType.Landing))
             {
                 // Task.Run(new LandingObj...)
+                _ = new LandingObj(flightId); // Should start the timer off and dont need to do anything else. (timers works on different threads?)
+                //Task.Factory.StartNew(() => new LandingObj(flightId));
                 return true;
             }
             return false;
@@ -45,14 +51,6 @@ namespace BLL
             // SignalR notification to client side & DB
         }
 
-        private bool CanStartDeparture()
-        {
-            return true;
-        }
-
-        private bool CanStartLanding()
-        {
-            return true;
-        }
+        private bool CanAddFlight(FlightType type) => _stationsState.CanAddFlight(type);
     }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Services.Controllers
 {
+    [Route("api/[controller]")]
     public class DepartureController : Controller
     {
         public IActionResult Index()
