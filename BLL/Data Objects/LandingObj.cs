@@ -47,15 +47,6 @@ namespace BLL.Data_Objects
             }
         }
 
-        //private void InitTimer()
-        //{
-        //    _dueTime = new TimeSpan(0);
-        //    _periodTime = StationsPath.CurrentStation.StandbyPeriod;
-        //    _timer = new Timer(OnTimerElapsed, null, _dueTime, _periodTime);
-        //}
-
-
-
         private void OnTimerElapsed(object state)
         {
             //Program.WriteToConsole($"Flight: {Flight.Id}, Station: {StationsPath.CurrentStation.Number}");
@@ -72,7 +63,7 @@ namespace BLL.Data_Objects
 
             if (_logic.MoveToNextStation(this))
             {
-                Debug.WriteLine($"FLight {Flight.Id} moved to station {StationsPath.CurrentStation.Number}");
+                Debug.WriteLine($"Flight {Flight.Id} moved to station {StationsPath.CurrentStation.Number}");
                 // Update the _periodTime to the station's StandbyTime.
                 _periodTime = StationsPath.CurrentStation.StandbyPeriod;
                 _timer.Change(new TimeSpan(0, 0, 10), new TimeSpan(0));

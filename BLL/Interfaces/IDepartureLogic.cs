@@ -5,7 +5,7 @@ namespace BLL.Interfaces
 {
     public interface IDepartureLogic : IStationsLogic
     {
-        StationsPathModel StartDeparture(DepartureObj departureObj);
+        bool StartDeparture(DepartureObj departureObj);
         bool FinishDaperture(DepartureObj departureObj);
     }
 }

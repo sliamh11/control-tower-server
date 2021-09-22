@@ -112,7 +112,7 @@ namespace Common.Data_Structures
             return false;
         }
 
-        // O(n) -> Check if possible for a flight to join to it's relevant path
+        // O(n) 
         public bool CanAddFlight(FlightType type)
         {
             var list = type == FlightType.Departure ? _startDepartureStations : _startLandingStations;

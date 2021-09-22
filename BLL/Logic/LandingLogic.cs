@@ -58,7 +58,6 @@ namespace BLL.Logic
 
             return _stationsState.IsStationEmpty(nextStation);
         }
-
         public bool MoveToNextStation(IDataObj dataObj)
         {
             var currStation = dataObj.StationsPath.CurrentStation;
