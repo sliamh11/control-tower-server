@@ -38,8 +38,6 @@ namespace BLL.Data_Objects
                 _dueTime = new TimeSpan(0, 0, 10);
                 _periodTime = new TimeSpan(0);
                 _timer = new Timer(OnTimerElapsed, null, _dueTime, _periodTime);
-                //worker = new BackgroundWorker();
-                //worker.DoWork += (s,e) => InitTimer;
             }
             else
             {
@@ -49,9 +47,7 @@ namespace BLL.Data_Objects
 
         private void OnTimerElapsed(object state)
         {
-            //Program.WriteToConsole($"Flight: {Flight.Id}, Station: {StationsPath.CurrentStation.Number}");
             Debug.WriteLine($"Flight: {Flight.Id}, Station: {StationsPath.CurrentStation.Number}");
-            // Add setter for estimated landing time (with the time from StationsModelPath)
             // Add try catch for StationNotFoundException and other exceptions.
 
             if (_logic.FinishLanding(this))
