@@ -10,5 +10,6 @@ namespace BLL.Interfaces
         bool StartDeparture(string flightId);
         bool StartLanding(string flightId);
         IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState();
+        void AddToWaitingList(FlightModel flight);
     }
 }

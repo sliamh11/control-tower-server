@@ -1,4 +1,5 @@
 ﻿using BLL.Interfaces;
+using BLL.Logic;
 using Common.Enums;
 using Common.Models;
 using System;
@@ -11,6 +12,7 @@ namespace BLL.Data_Objects
     {
         #region Private Fields
         private IDepartureLogic _logic;
+        private IStationsManager _stationsManager;
         private Timer _timer;
         private TimeSpan _dueTime;
         private TimeSpan _periodTime;
@@ -20,16 +22,18 @@ namespace BLL.Data_Objects
         public FlightModel Flight { get; set; }
         public StationsPathModel StationsPath { get; set; }
         #endregion
-        // For DI
-        public DepartureObj(IDepartureLogic departureLogic)
-        {
-            _logic = departureLogic;
-        }
-        
+
         // For params
-        public DepartureObj(string flightId)
+        public DepartureObj(string flightId, IStationsManager stationsManager)
         {
+            _logic = new DepartureLogic();
             Flight = new FlightModel(flightId, FlightType.Departure);
+            _stationsManager = stationsManager;
+            InitDeparture();
+        }
+
+        private void InitDeparture()
+        {
             if (_logic.StartDeparture(this))
             {
                 //_dueTime = StationsPath.CurrentStation.StandbyPeriod;
@@ -39,7 +43,10 @@ namespace BLL.Data_Objects
             }
             else
             {
-                // Add to TowerManager Departure Queue
+                // If somehow it isn't possible to get a path - send back to queue
+                // Will accure only in specific timings like an object has been made and at the same time an important station was blocked
+                _stationsManager.AddToWaitingList(Flight);
+                // Send an update to the plane / client
             }
         }
 

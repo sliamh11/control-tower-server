@@ -12,6 +12,7 @@ namespace BLL.Data_Objects
     {
         #region Private Fields
         private ILandingLogic _logic;
+        private IStationsManager _stationsManager;
         private Timer _timer;
         private TimeSpan _dueTime;
         private TimeSpan _periodTime;
@@ -22,16 +23,16 @@ namespace BLL.Data_Objects
         public StationsPathModel StationsPath { get; set; }
         #endregion
 
-        public LandingObj(string flightId)
+        public LandingObj(string flightId, IStationsManager stationsManager)
         {
-
             _logic = new LandingLogic();
-            InitLanding(flightId);
+            Flight = new FlightModel(flightId, FlightType.Landing);
+            _stationsManager = stationsManager;
+            InitLanding();
         }
 
-        private void InitLanding(string flightId)
+        private void InitLanding()
         {
-            Flight = new FlightModel(flightId, FlightType.Landing);
             if (_logic.StartLanding(this))
             {
                 //_dueTime = StationsPath.CurrentStation.StandbyPeriod;
@@ -41,7 +42,10 @@ namespace BLL.Data_Objects
             }
             else
             {
-                // Add to TowerManager Landing Queue
+                // If somehow it isn't possible to get a path - send back to queue
+                // Will accure only in specific timings like an object has been made and at the same time an important station was blocked
+                _stationsManager.AddToWaitingList(Flight);
+                // Send an update to the plane / client
             }
         }
 
