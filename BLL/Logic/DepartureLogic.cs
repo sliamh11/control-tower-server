@@ -1,8 +1,7 @@
 ﻿using BLL.Data_Objects;
 using BLL.Interfaces;
-using Common.Exceptions;
-using Common.Models;
 using System;
+using System.Threading.Tasks;
 
 namespace BLL.Logic
 {
@@ -31,42 +30,9 @@ namespace BLL.Logic
             _stationsState.MoveToStation(null, pathEdges.Item1, departureObj.Flight);
             return true;
         }
-
-        private bool CanMoveToNextStation(IDataObj dataObj)
+        public async Task<bool> StartDepartureAsync(DepartureObj departureObj)
         {
-            var nextStation = dataObj.StationsPath.Path.First.Next?.Value;
-            if (nextStation == null)
-                throw new StationNotFoundException();
-
-            return _stationsState.IsStationEmpty(nextStation);
-        }
-        public bool MoveToNextStation(IDataObj dataObj)
-        {
-            var currStation = dataObj.StationsPath.CurrentStation;
-            var targetStation = dataObj.StationsPath.Path.Last.Value;
-            try
-            {
-                if (CanMoveToNextStation(dataObj))
-                {
-                    var nextStation = dataObj.StationsPath.Path.First.Next.Value;
-                    _stationsState.FindFastestPath(nextStation, targetStation);
-                    _stationsState.MoveToStation(currStation, nextStation, dataObj.Flight);
-                    dataObj.StationsPath.Path.RemoveFirst(); // Remove old station
-                    dataObj.StationsPath.CurrentStation = nextStation; // Update the current station.
-
-                    // Call the StateUpdated() func.
-                    // Update DB?
-                    return true;
-                }
-            }
-            catch (StationNotFoundException)
-            {
-                // Re-set the flight's stations path.
-                dataObj.StationsPath = _stationsState.FindFastestPath(currStation, targetStation);
-                MoveToNextStation(dataObj);
-            }
-            return false;
-            // Other exceptions will be cought in the service?
+            return await Task.Run(() => StartDeparture(departureObj));
         }
 
         private bool CanFinishDeparture(DepartureObj departureObj)
@@ -85,5 +51,10 @@ namespace BLL.Logic
 
             return false;
         }
+        public async Task<bool> FinishDapertureAsync(DepartureObj departureObj)
+        {
+            return await Task.Run(() => FinishDaperture(departureObj));
+        }
+
     }
 }

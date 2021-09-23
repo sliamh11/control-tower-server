@@ -11,8 +11,8 @@ namespace BLL.Data_Objects
     public class DepartureObj : IDataObj
     {
         #region Private Fields
-        private IDepartureLogic _logic;
-        private IStationsManager _stationsManager;
+        private IDepartureLogic _depLogic;
+        private ITowerLogic _towerLogic;
         private Timer _timer;
         private TimeSpan _dueTime;
         private TimeSpan _periodTime;
@@ -24,17 +24,17 @@ namespace BLL.Data_Objects
         #endregion
 
         // For params
-        public DepartureObj(string flightId, IStationsManager stationsManager)
+        public DepartureObj(string flightId, ITowerLogic towerLogic)
         {
-            _logic = new DepartureLogic();
+            _depLogic = new DepartureLogic();
             Flight = new FlightModel(flightId, FlightType.Departure);
-            _stationsManager = stationsManager;
+            _towerLogic = towerLogic;
             InitDeparture();
         }
 
-        private void InitDeparture()
+        private async void InitDeparture()
         {
-            if (_logic.StartDeparture(this))
+            if (await _depLogic.StartDepartureAsync(this))
             {
                 //_dueTime = StationsPath.CurrentStation.StandbyPeriod;
                 _dueTime = new TimeSpan(0, 0, 10);
@@ -45,24 +45,24 @@ namespace BLL.Data_Objects
             {
                 // If somehow it isn't possible to get a path - send back to queue
                 // Will accure only in specific timings like an object has been made and at the same time an important station was blocked
-                _stationsManager.AddToWaitingList(Flight);
+                _towerLogic.AddToWaitingList(Flight);
                 // Send an update to the plane / client
             }
         }
 
-        private void OnTimerElapsed(object state)
+        private async void OnTimerElapsed(object state)
         {
             Debug.WriteLine($"Flight: {Flight.Id}, Station: {StationsPath.CurrentStation.Number}");
             // Add try catch for StationNotFoundException and other exceptions.
 
-            if (_logic.FinishDaperture(this))
+            if (await _depLogic.FinishDapertureAsync(this))
             {
                 Debug.WriteLine($"Flight {Flight.Id} has departured.");
                 _timer.Dispose();
                 return;
             }
 
-            if (_logic.MoveToNextStation(this))
+            if (await _towerLogic.MoveToNextStationAsync(this))
             {
                 Debug.WriteLine($"Flight {Flight.Id} moved to station {StationsPath.CurrentStation.Number}");
                 // Update the _periodTime to the station's StandbyTime.

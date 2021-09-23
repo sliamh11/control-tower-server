@@ -1,11 +1,12 @@
 ﻿using BLL.Data_Objects;
 using Common.Models;
+using System.Threading.Tasks;
 
 namespace BLL.Interfaces
 {
-    public interface ILandingLogic : IStationsLogic
+    public interface ILandingLogic
     {
-        bool StartLanding(LandingObj landingObj);
-        bool FinishLanding(LandingObj landingObj);
+        Task<bool> StartLandingAsync(LandingObj landingObj);
+        Task<bool> FinishLandingAsync(LandingObj landingObj);
     }
 }

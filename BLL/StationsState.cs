@@ -150,7 +150,7 @@ namespace BLL
                 return _stations.CanAddFlight(type);
         }
 
-        //public bool UpdateStation(int index, object updatedStation)
+        //public bool UpdateStation(StationModel updatedStation)
         //{
         //    lock (_stationsLock)
         //    {

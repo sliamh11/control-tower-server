@@ -11,8 +11,8 @@ namespace BLL.Data_Objects
     public class LandingObj : IDataObj
     {
         #region Private Fields
-        private ILandingLogic _logic;
-        private IStationsManager _stationsManager;
+        private ILandingLogic _landLogic;
+        private ITowerLogic _towerLogic;
         private Timer _timer;
         private TimeSpan _dueTime;
         private TimeSpan _periodTime;
@@ -23,17 +23,17 @@ namespace BLL.Data_Objects
         public StationsPathModel StationsPath { get; set; }
         #endregion
 
-        public LandingObj(string flightId, IStationsManager stationsManager)
+        public LandingObj(string flightId, ITowerLogic towerLogic)
         {
-            _logic = new LandingLogic();
+            _landLogic = new LandingLogic();
             Flight = new FlightModel(flightId, FlightType.Landing);
-            _stationsManager = stationsManager;
+            _towerLogic = towerLogic;
             InitLanding();
         }
 
         private void InitLanding()
         {
-            if (_logic.StartLanding(this))
+            if (_landLogic.StartLanding(this))
             {
                 //_dueTime = StationsPath.CurrentStation.StandbyPeriod;
                 _dueTime = new TimeSpan(0, 0, 10);
@@ -44,24 +44,24 @@ namespace BLL.Data_Objects
             {
                 // If somehow it isn't possible to get a path - send back to queue
                 // Will accure only in specific timings like an object has been made and at the same time an important station was blocked
-                _stationsManager.AddToWaitingList(Flight);
+                _towerLogic.AddToWaitingList(Flight);
                 // Send an update to the plane / client
             }
         }
 
-        private void OnTimerElapsed(object state)
+        private async void OnTimerElapsed(object state)
         {
             Debug.WriteLine($"Flight: {Flight.Id}, Station: {StationsPath.CurrentStation.Number}");
             // Add try catch for StationNotFoundException and other exceptions.
 
-            if (_logic.FinishLanding(this))
+            if (await _landLogic.FinishLandingAsync(this))
             {
                 Debug.WriteLine($"Flight {Flight.Id} has landed.");
                 _timer.Dispose();
                 return;
             }
 
-            if (_logic.MoveToNextStation(this))
+            if (await _towerLogic.MoveToNextStationAsync(this))
             {
                 Debug.WriteLine($"Flight {Flight.Id} moved to station {StationsPath.CurrentStation.Number}");
                 // Update the _periodTime to the station's StandbyTime.

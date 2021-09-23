@@ -1,11 +1,12 @@
 ﻿using BLL.Data_Objects;
 using Common.Models;
+using System.Threading.Tasks;
 
 namespace BLL.Interfaces
 {
-    public interface IDepartureLogic : IStationsLogic
+    public interface IDepartureLogic
     {
-        bool StartDeparture(DepartureObj departureObj);
-        bool FinishDaperture(DepartureObj departureObj);
+        Task<bool> StartDepartureAsync(DepartureObj departureObj);
+        Task<bool> FinishDapertureAsync(DepartureObj departureObj);
     }
 }
