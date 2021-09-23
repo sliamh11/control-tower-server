@@ -29,11 +29,7 @@ namespace Services
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            //services.AddSwaggerGen(c =>
-            //{
-            //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Services", Version = "v1" });
-            //});
-            services.AddSingleton<IStationsManager, StationsManager>();
+            services.AddSingleton<ITowerManager, TowerManager>();
 
             // If ill use them in an API - I'll add them
             //services.AddScoped<ILandingLogic, LandingLogic>();
@@ -46,8 +42,6 @@ namespace Services
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                //app.UseSwagger();
-                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Services v1"));
             }
 
             app.UseRouting();

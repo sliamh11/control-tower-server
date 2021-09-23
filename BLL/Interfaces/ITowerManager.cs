@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace BLL.Interfaces
 {
-    public interface IStationsManager
+    public interface ITowerManager
     {
         void AddStation(List<StationModel> newStation);
         bool StartDeparture(string flightId);

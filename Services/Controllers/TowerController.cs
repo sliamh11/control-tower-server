@@ -10,8 +10,8 @@ namespace Services.Controllers
     [Route("api/[controller]")]
     public class TowerController : Controller
     {
-        private readonly IStationsManager _manager;
-        public TowerController(IStationsManager manager)
+        private readonly ITowerManager _manager;
+        public TowerController(ITowerManager manager)
         {
             _manager = manager;
         }

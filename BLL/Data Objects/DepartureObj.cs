@@ -12,6 +12,7 @@ namespace BLL.Data_Objects
     {
         #region Private Fields
         private IDepartureLogic _depLogic;
+        private IStationsLogic _stationsLogic;
         private ITowerLogic _towerLogic;
         private Timer _timer;
         private TimeSpan _dueTime;
@@ -27,8 +28,9 @@ namespace BLL.Data_Objects
         public DepartureObj(string flightId, ITowerLogic towerLogic)
         {
             _depLogic = new DepartureLogic();
-            Flight = new FlightModel(flightId, FlightType.Departure);
+            _stationsLogic = new StationsLogic();
             _towerLogic = towerLogic;
+            Flight = new FlightModel(flightId, FlightType.Departure);
             InitDeparture();
         }
 
@@ -62,7 +64,7 @@ namespace BLL.Data_Objects
                 return;
             }
 
-            if (await _towerLogic.MoveToNextStationAsync(this))
+            if (await _stationsLogic.MoveToNextStationAsync(this))
             {
                 Debug.WriteLine($"Flight {Flight.Id} moved to station {StationsPath.CurrentStation.Number}");
                 // Update the _periodTime to the station's StandbyTime.
