@@ -13,7 +13,7 @@ namespace BLL.Interfaces
         bool IsStationEmpty(StationModel station);
         StationsPathModel FindFastestPath(int startIndex, int targetIndex);
         StationsPathModel FindFastestPath(StationModel currStation, StationModel targetStation);
-        void MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight);
+        bool MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight);
         Tuple<StationModel, StationModel> GetPathEdgeStations(FlightModel flight);
         void RemoveFlight(StationModel station);
         bool CanAddFlight(FlightType type);

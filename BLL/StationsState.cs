@@ -106,11 +106,11 @@ namespace BLL
             }
         }
 
-        public void MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight)
+        public bool MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight)
         {
             lock (_stationsLock)
             {
-                _stations.MoveToStation(fromStation, toStation, flight);
+                return _stations.MoveToStation(fromStation, toStation, flight);
             }
         }
 
@@ -143,11 +143,15 @@ namespace BLL
         public bool CanAddFlight(FlightType type)
         {
             if (type == FlightType.Departure)
+            {
                 lock (_getDepartureLock)
                     return _stations.CanAddFlight(type);
-
-            lock (_getLandingLock)
-                return _stations.CanAddFlight(type);
+            }
+            else
+            {
+                lock (_getLandingLock)
+                    return _stations.CanAddFlight(type);
+            }
         }
 
         //public bool UpdateStation(StationModel updatedStation)

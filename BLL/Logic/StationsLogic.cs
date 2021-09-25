@@ -1,5 +1,7 @@
 ﻿using BLL.Interfaces;
+using Common.Enums;
 using Common.Exceptions;
+using System;
 using System.Threading.Tasks;
 
 namespace BLL.Logic
@@ -22,36 +24,43 @@ namespace BLL.Logic
             if (nextStation == null)
                 throw new StationNotFoundException();
 
+            if (nextStation.Status != StationStatuses.Open)
+                throw new StationNotAvailableException();
+
             return _stationsState.IsStationEmpty(nextStation);
         }
 
         public bool MoveToNextStation(IDataObj dataObj)
         {
             var currStation = dataObj.StationsPath.CurrentStation;
-            var targetStation = dataObj.StationsPath.Path.Last.Value;
             try
             {
                 if (CanMoveToNextStation(dataObj))
                 {
                     var nextStation = dataObj.StationsPath.Path.First.Next.Value;
-                    _stationsState.FindFastestPath(nextStation, targetStation); // Check if needed at all
-                    _stationsState.MoveToStation(currStation, nextStation, dataObj.Flight);
-                    dataObj.StationsPath.Path.RemoveFirst(); // Remove old station
-                    dataObj.StationsPath.CurrentStation = nextStation; // Update the current station.
-
-                    // Call the StateUpdated() func.
-                    // Update DB?
-                    return true;
+                    //_stationsState.FindFastestPath(nextStation, targetStation); // Check if needed at all
+                    if (_stationsState.MoveToStation(currStation, nextStation, dataObj.Flight))
+                    {
+                        dataObj.StationsPath.Path.RemoveFirst(); // Remove old station
+                        dataObj.StationsPath.CurrentStation = nextStation; // Update the current station.
+                        // Call the StateUpdated() func.
+                        // Update DB?
+                        return true;
+                    }
                 }
+                    return false;
             }
-            catch (StationNotFoundException)
+            catch (Exception ex) // Needs to be StationNotAvailableException
             {
-                // Re-set the flight's stations path.
-                dataObj.StationsPath = _stationsState.FindFastestPath(currStation, targetStation);
-                return MoveToNextStation(dataObj);
+                if (ex is StationNotAvailableException || ex is StationNotFoundException)
+                {
+                    // Re-set the flight's stations path.
+                    var finalStation = dataObj.StationsPath.Path.Last.Value;
+                    dataObj.StationsPath = _stationsState.FindFastestPath(currStation, finalStation);
+                    return MoveToNextStation(dataObj);
+                }
+                throw;
             }
-            return false;
-            // Other exceptions will be cought in the service?
         }
 
         public async Task<bool> MoveToNextStationAsync(IDataObj dataObj)

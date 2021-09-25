@@ -4,6 +4,7 @@ using Common.Enums;
 using Common.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Timers;
 
 namespace BLL
@@ -13,35 +14,34 @@ namespace BLL
         private IStationsState _stationsState;
         private LinkedList<FlightModel> _waitingFlightsList;
         private Timer _queueTimer;
-        private bool _canLand;
-        private bool _canDeparture;
 
         public TowerManager()
         {
             _stationsState = StationsState.Instance;
             _waitingFlightsList = new LinkedList<FlightModel>();
-            _canLand = true;
-            _canDeparture = true;
-            _queueTimer = new Timer(60000);
+            //_queueTimer = new Timer(60000);
+            _queueTimer = new Timer(20000); // 20 Seconds
             _queueTimer.Elapsed += (s, e) => OnTimerElapsed();
             _queueTimer.Start();
         }
 
         private void OnTimerElapsed()
         {
+            Debug.WriteLine($"*** Awaiting Flights: {_waitingFlightsList.Count} ***");
             // Reset canLand & canDeparture's status
-            _canLand = true;
-            _canDeparture = true;
+            bool canLand = true;
+            bool canDeparture = true;
             if (_waitingFlightsList.Count > 0)
             {
+                LinkedList<FlightModel> removalList = new LinkedList<FlightModel>();
                 foreach (var flight in _waitingFlightsList)
                 {
                     bool isLanding = flight.Type == FlightType.Landing;
                     // Check if flight is relevant at all.
-                    if (isLanding && !_canLand)
+                    if (isLanding && !canLand)
                         continue;
 
-                    if (!isLanding && !_canDeparture)
+                    if (!isLanding && !canDeparture)
                         continue;
 
                     if (_stationsState.CanAddFlight(flight.Type))
@@ -51,20 +51,23 @@ namespace BLL
                         else
                             StartDeparture(flight.Id);
 
-                        _waitingFlightsList.Remove(flight);
+                        removalList.AddLast(flight);
                     }
                     else
                     {
                         if (isLanding)
-                            _canLand = false;
+                            canLand = false;
                         else
-                            _canDeparture = false;
+                            canDeparture = false;
                     }
 
                     // If no available spots at all - exit current timer's interval.
-                    if (!_canLand && !_canDeparture)
-                        return;
+                    if (!canLand && !canDeparture)
+                        break;
                 }
+
+                foreach (var flight in removalList)
+                    _waitingFlightsList.Remove(flight);
             }
         }
 
@@ -78,9 +81,10 @@ namespace BLL
 
         public IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState() => _stationsState.GetStationsState();
 
+        // The flight arrives to the function but still not shows, like the timer wouldn't even run. (maybe something with StartDepartureAsync function?)
         public bool StartDeparture(string flightId)
         {
-            if (_canDeparture)
+            if (_stationsState.CanAddFlight(FlightType.Departure))
             {
                 _ = new DepartureObj(flightId, this); // Works on another thread with a timer
                 return true;
@@ -97,7 +101,7 @@ namespace BLL
 
         public bool StartLanding(string flightId)
         {
-            if (_canLand)
+            if (_stationsState.CanAddFlight(FlightType.Landing))
             {
                 _ = new LandingObj(flightId, this); // Works on another thread with a timer
                 return true;

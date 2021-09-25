@@ -10,8 +10,6 @@ namespace Common.Enums
     {
         // Open
         Open = 0,
-        Departure,
-        Landing,
 
         // Closed
         Closed = 10,

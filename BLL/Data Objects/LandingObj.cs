@@ -65,13 +65,14 @@ namespace BLL.Data_Objects
 
             if (await _stationsLogic.MoveToNextStationAsync(this))
             {
-                Debug.WriteLine($"Flight {Flight.Id} moved to station {StationsPath.CurrentStation.Number}");
+                Debug.WriteLine($" + Flight {Flight.Id} moved to station {StationsPath.CurrentStation.Number}");
                 // Update the _periodTime to the station's StandbyTime.
                 _periodTime = StationsPath.CurrentStation.StandbyPeriod;
                 _timer.Change(new TimeSpan(0, 0, 10), new TimeSpan(0));
             }
             else
             {
+                Debug.WriteLine($" - Flight {Flight.Id} is delayed ");
                 // Delay scedhualed landing.
                 Flight.LandingTime += _periodTime;
             }

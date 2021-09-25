@@ -3,6 +3,7 @@ using Common.Exceptions;
 using Common.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Common.Data_Structures
@@ -90,12 +91,11 @@ namespace Common.Data_Structures
         }
 
         // O(n)
-        private StationModel GetFastestStation(IEnumerable<StationModel> stations, bool isAvailableStation = false)
+        private StationModel GetFastestStation(IEnumerable<StationModel> stations, bool isEmptyStation = false)
         {
-            return stations.Aggregate((minStandbyStation, station) =>
-            station.StandbyPeriod < (minStandbyStation?.StandbyPeriod ?? station.StandbyPeriod) // with the least standby time
-            && (isAvailableStation ? station.CurrentFlight == null : true) // and has no current flight in it
-            ? station : minStandbyStation);
+            return stations.Where(x => isEmptyStation ? x.CurrentFlight == null : true)
+                .Aggregate((minStandbyStation, station) =>
+                station.StandbyPeriod < (minStandbyStation?.StandbyPeriod ?? station.StandbyPeriod) ? station : minStandbyStation);
         }
 
         // O(n)
@@ -118,6 +118,7 @@ namespace Common.Data_Structures
             var list = type == FlightType.Departure ? _startDepartureStations : _startLandingStations;
             foreach (var item in list)
             {
+                Debug.WriteLine($"~~~ In CanAddFlight foreach ~~~");
                 if (item.CurrentFlight == null)
                     return true;
             }
@@ -169,7 +170,7 @@ namespace Common.Data_Structures
             table[startIndex].Weight = new TimeSpan(0);
         }
 
-        // O(n Log n)
+        // O(n)
         private void FillStationsTable(int index, StationsTable[] table)
         {
             while (table.Any(table => !table.IsVisited))
@@ -191,7 +192,7 @@ namespace Common.Data_Structures
             }
         }
 
-        // O(n Log n)
+        // O(n)
         private void FillStationsTable(int index, StationsTable[] table, StationModel startStation, StationModel targetStation)
         {
             while (table.Any(table => !table.IsVisited))
@@ -231,20 +232,21 @@ namespace Common.Data_Structures
         }
 
         // O(n)
-        public void MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight)
+        public bool MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight)
         {
             if (toStation == null)
                 throw new StationNotFoundException();
 
+            var targetStation = _stations[toStation.Number].Find(x => x == toStation);
+
             // In case of Starting a landing / departure process.
             if (fromStation == null && toStation != null)
             {
-                var station = _stations[toStation.Number].Find(x => x == toStation);
-                if (station == null)
+                if (targetStation == null)
                     throw new StationNotFoundException();
 
-                station.CurrentFlight = flight;
-                return;
+                targetStation.CurrentFlight = flight;
+                return true;
             }
 
             // At this point, fromStation must have a value.
@@ -252,16 +254,18 @@ namespace Common.Data_Structures
                 throw new StationNotFoundException();
 
             var startStation = _stations[fromStation.Number].Find(x => x == fromStation);
-            var targetStation = _stations[toStation.Number].Find(x => x == toStation);
 
             if (startStation == null || targetStation == null)
                 throw new StationNotFoundException();
 
-            if (startStation.CurrentFlight == flight && targetStation.CurrentFlight == null)
+            // If next station is empty - move the flight to it.
+            if (targetStation.CurrentFlight == null)
             {
                 startStation.CurrentFlight = null;
                 targetStation.CurrentFlight = flight;
+                return true;
             }
+            return false;
         }
 
         // O(n) 
