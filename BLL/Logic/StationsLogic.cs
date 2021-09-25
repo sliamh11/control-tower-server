@@ -38,7 +38,6 @@ namespace BLL.Logic
                 if (CanMoveToNextStation(dataObj))
                 {
                     var nextStation = dataObj.StationsPath.Path.First.Next.Value;
-                    //_stationsState.FindFastestPath(nextStation, targetStation); // Check if needed at all
                     if (_stationsState.MoveToStation(currStation, nextStation, dataObj.Flight))
                     {
                         dataObj.StationsPath.Path.RemoveFirst(); // Remove old station

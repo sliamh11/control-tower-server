@@ -118,7 +118,6 @@ namespace Common.Data_Structures
             var list = type == FlightType.Departure ? _startDepartureStations : _startLandingStations;
             foreach (var item in list)
             {
-                Debug.WriteLine($"~~~ In CanAddFlight foreach ~~~");
                 if (item.CurrentFlight == null)
                     return true;
             }

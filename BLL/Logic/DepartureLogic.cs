@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace BLL.Logic
 {
+    // Instance created per request (scoped).
     public class DepartureLogic : IDepartureLogic
     {
         private IStationsState _stationsState;

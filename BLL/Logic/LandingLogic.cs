@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 namespace BLL.Logic
 {
     // Instance created per request (scoped).
-    // MAKE THIS CLASS METHODS ASYNC
     public class LandingLogic : ILandingLogic
     {
         private IStationsState _stationsState;
@@ -32,6 +31,10 @@ namespace BLL.Logic
             _stationsState.MoveToStation(null, pathEdges.Item1, landingObj.Flight);
             return true;
         }
+        public async Task<bool> StartLandingAsync(LandingObj landingObj)
+        {
+            return await Task.Run(() => StartLanding(landingObj));
+        }
 
         private bool CanFinishLanding(LandingObj landingObj)
         {
@@ -49,12 +52,6 @@ namespace BLL.Logic
 
             return false;
         }
-
-        public async Task<bool> StartLandingAsync(LandingObj landingObj)
-        {
-            return await Task.Run(() => StartLanding(landingObj));
-        }
-
         public async Task<bool> FinishLandingAsync(LandingObj landingObj)
         {
             return await Task.Run(() => FinishLanding(landingObj));
