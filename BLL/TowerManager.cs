@@ -19,15 +19,13 @@ namespace BLL
         {
             _stationsState = StationsState.Instance;
             _waitingFlightsList = new LinkedList<FlightModel>();
-            //_queueTimer = new Timer(60000);
-            _queueTimer = new Timer(20000); // 20 Seconds
+            _queueTimer = new Timer(30000); // 30 Seconds
             _queueTimer.Elapsed += (s, e) => OnTimerElapsed();
             _queueTimer.Start();
         }
 
         private void OnTimerElapsed()
         {
-            Debug.WriteLine($"*** Awaiting Flights: {_waitingFlightsList.Count} ***");
             // Reset canLand & canDeparture's status
             bool canLand = true;
             bool canDeparture = true;
