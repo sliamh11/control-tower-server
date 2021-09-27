@@ -28,28 +28,31 @@ namespace BLL.Test
             Assert.IsTrue(result);
         }
 
-        // When flight is not at the last station:
+        // When flight is not at the last station
         [TestMethod]
         public void CantFinishDepartureTest()
         {
             // Arrange
             var depObj = new DepartureObj("CantFinishDepartureTest");
-            _logic.StartDeparture(depObj);
+            var result = _logic.StartDeparture(depObj);
+            Assert.IsTrue(result);
 
             // Act - The flight just started it's path, therefor cant finish and returns false
-            var result = _logic.FinishDaperture(depObj); 
+            result = _logic.FinishDaperture(depObj); 
 
             // Assert
             Assert.IsFalse(result);
         }
 
-        // When flight is at the last station:
+        // When flight is at the last station
         [TestMethod]
         public void CanFinishDepartureTest()
         {
             //Arrange - Remove all stations but the last one
             var depObj = new DepartureObj("CanFinishDepartureTest");
-            _logic.StartDeparture(depObj);
+            var result = _logic.StartDeparture(depObj);
+            Assert.IsTrue(result);
+
             var currStation = depObj.StationsPath.Path.First;
             while (currStation != null && currStation.Value != depObj.StationsPath.Path.Last.Value)
             {
@@ -60,7 +63,7 @@ namespace BLL.Test
             depObj.StationsPath.CurrentStation = currStation.Value;
 
             // Act
-            var result = _logic.FinishDaperture(depObj);
+            result = _logic.FinishDaperture(depObj);
 
             // Assert
             Assert.IsTrue(result);

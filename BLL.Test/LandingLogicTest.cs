@@ -28,7 +28,7 @@ namespace BLL.Test
             Assert.IsTrue(result);
         }
 
-        // When flight is not at the last station:
+        // When flight is not at the last station
         [TestMethod]
         public void CantFinishLandingTest()
         {
@@ -45,7 +45,7 @@ namespace BLL.Test
             Assert.IsFalse(result);
         }
 
-        // When flight is at the last station:
+        // When flight is at the last station
         [TestMethod]
         public void CanFinishLandingTest()
         {
@@ -53,6 +53,7 @@ namespace BLL.Test
             var landObj = new LandingObj("CanFinishDepartureTest");
             var result = _logic.StartLanding(landObj);
             Assert.IsTrue(result);
+
             var currStation = landObj.StationsPath.Path.First;
             
             while (currStation != null && currStation.Value != landObj.StationsPath.Path.Last.Value)
