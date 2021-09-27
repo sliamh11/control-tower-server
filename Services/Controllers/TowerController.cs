@@ -1,7 +1,9 @@
 ﻿using BLL.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Simulator;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,19 +13,23 @@ namespace Services.Controllers
     public class TowerController : Controller
     {
         private readonly ITowerManager _manager;
+        private readonly SimulatorManager _simulator;
+
         public TowerController(ITowerManager manager)
         {
+            _simulator = SimulatorManager.Instance;
             _manager = manager;
         }
 
+        [Route("")]
         public IActionResult Index() => Ok("In tower controller");
 
-        [Route("start-departure/{flightId}")]
-        public IActionResult StartDeparture(string flightId)
+        [HttpPost("start-departure")]
+        public async Task<IActionResult> StartDeparture([FromBody] string flightId)
         {
             try
             {
-                if (_manager.StartDeparture(flightId))
+                if (await _manager.StartDepartureAsync(flightId))
                     return Ok($"Flight: {flightId} Started departure proccess.");
 
                 return Ok("Departure entered to queue.");
@@ -34,12 +40,12 @@ namespace Services.Controllers
             }
         }
 
-        [Route("start-landing/{flightId}")]
-        public IActionResult StartLanding(string flightId)
+        [HttpPost("start-landing")]
+        public async Task<IActionResult> StartLanding([FromBody] string flightId)
         {
             try
             {
-                if (_manager.StartLanding(flightId))
+                if (await _manager.StartLandingAsync(flightId))
                     return Ok($"Flight: {flightId} Started landing proccess.");
 
                 return BadRequest($"Landing entered to queue.");

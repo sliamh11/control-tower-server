@@ -28,8 +28,7 @@ namespace BLL.Logic
 
             departureObj.StationsPath = path;
             departureObj.Flight.DepartureTime = DateTime.Now + departureObj.StationsPath.OverallTime;
-            _stationsState.MoveToStation(null, pathEdges.Item1, departureObj.Flight);
-            return true;
+            return _stationsState.MoveToStation(null, pathEdges.Item1, departureObj.Flight);
         }
         public async Task<bool> StartDepartureAsync(DepartureObj departureObj)
         {

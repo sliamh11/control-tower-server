@@ -5,6 +5,7 @@ using Common.Models;
 using System;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace BLL.Data_Objects
 {
@@ -13,7 +14,6 @@ namespace BLL.Data_Objects
         #region Private Fields
         private IDepartureLogic _depLogic;
         private IStationsLogic _stationsLogic;
-        private ITowerLogic _towerLogic;
         private Timer _timer;
         private TimeSpan _delayTime;
         #endregion
@@ -24,28 +24,22 @@ namespace BLL.Data_Objects
         #endregion
 
         // For params
-        public DepartureObj(string flightId, ITowerLogic towerLogic)
+        public DepartureObj(string flightId)
         {
             _depLogic = new DepartureLogic();
             _stationsLogic = new StationsLogic();
-            _towerLogic = towerLogic;
             Flight = new FlightModel(flightId, FlightType.Departure);
-            InitDeparture();
         }
 
-        private async void InitDeparture()
+        public async Task<bool> Start()
         {
             if (await _depLogic.StartDepartureAsync(this))
             {
                 _delayTime = StationsPath.CurrentStation.StandbyPeriod;
                 _timer = new Timer(OnTimerElapsed, null, _delayTime, _delayTime);
+                return true;
             }
-            else
-            {
-                // Not supposed to happen, but just in case.
-                _towerLogic.AddToWaitingList(Flight);
-                // Send an update to the plane / client
-            }
+            return false;
         }
 
         private async void OnTimerElapsed(object state)

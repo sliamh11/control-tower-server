@@ -11,5 +11,6 @@ namespace BLL.Interfaces
     {
         public FlightModel Flight { get; set; }
         public StationsPathModel StationsPath { get; set; }
+        Task<bool> Start();
     }
 }

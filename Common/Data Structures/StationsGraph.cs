@@ -93,6 +93,9 @@ namespace Common.Data_Structures
         // O(n)
         private StationModel GetFastestStation(IEnumerable<StationModel> stations, bool isEmptyStation = false)
         {
+            if (stations == null || stations.FirstOrDefault() == null)
+                return null;
+
             return stations.Where(x => isEmptyStation ? x.CurrentFlight == null : true)
                 .Aggregate((minStandbyStation, station) =>
                 station.StandbyPeriod < (minStandbyStation?.StandbyPeriod ?? station.StandbyPeriod) ? station : minStandbyStation);

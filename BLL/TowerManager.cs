@@ -5,11 +5,12 @@ using Common.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace BLL
 {
-    public class TowerManager : ITowerManager, ITowerLogic
+    public class TowerManager : ITowerManager
     {
         private IStationsState _stationsState;
         private LinkedList<FlightModel> _waitingFlightsList;
@@ -24,7 +25,7 @@ namespace BLL
             _queueTimer.Start();
         }
 
-        private void OnTimerElapsed()
+        private async void OnTimerElapsed()
         {
             // Reset canLand & canDeparture's status
             bool canLand = true;
@@ -45,9 +46,9 @@ namespace BLL
                     if (_stationsState.CanAddFlight(flight.Type))
                     {
                         if (isLanding)
-                            StartLanding(flight.Id);
+                            await StartLandingAsync(flight.Id);
                         else
-                            StartDeparture(flight.Id);
+                            await StartDepartureAsync(flight.Id);
 
                         removalList.AddLast(flight);
                     }
@@ -80,35 +81,33 @@ namespace BLL
         public IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState() => _stationsState.GetStationsState();
 
         // The flight arrives to the function but still not shows, like the timer wouldn't even run. (maybe something with StartDepartureAsync function?)
-        public bool StartDeparture(string flightId)
+        public async Task<bool> StartDepartureAsync(string flightId)
         {
             if (_stationsState.CanAddFlight(FlightType.Departure))
             {
-                _ = new DepartureObj(flightId, this); // Works on another thread with a timer
-                return true;
+                var depObj = new DepartureObj(flightId); // Works on another thread with a timer
+                if (await depObj.Start())
+                    return true;
             }
-            else
-            {
-                var flight = new FlightModel(flightId, FlightType.Departure);
-                _waitingFlightsList.AddLast(flight);
-            }
+
+            var flight = new FlightModel(flightId, FlightType.Departure);
+            _waitingFlightsList.AddLast(flight);
 
             // SignalR notification to client side & DB
             return false;
         }
 
-        public bool StartLanding(string flightId)
+        public async Task<bool> StartLandingAsync(string flightId)
         {
             if (_stationsState.CanAddFlight(FlightType.Landing))
             {
-                _ = new LandingObj(flightId, this); // Works on another thread with a timer
-                return true;
+                var landObj = new LandingObj(flightId); // Works on another thread with a timer
+                if (await landObj.Start())
+                    return true;
             }
-            else
-            {
-                var flight = new FlightModel(flightId, FlightType.Landing);
-                _waitingFlightsList.AddLast(flight);
-            }
+
+            var flight = new FlightModel(flightId, FlightType.Landing);
+            _waitingFlightsList.AddLast(flight);
 
             // SignalR notification to client side & DB
             return false;

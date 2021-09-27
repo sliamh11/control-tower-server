@@ -1,14 +1,15 @@
 ﻿using Common.Data_Structures;
 using Common.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BLL.Interfaces
 {
     public interface ITowerManager
     {
         void AddStation(List<StationModel> newStation);
-        bool StartDeparture(string flightId);
-        bool StartLanding(string flightId);
+        Task<bool> StartDepartureAsync(string flightId);
+        Task<bool> StartLandingAsync(string flightId);
         IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState();
     }
 }
