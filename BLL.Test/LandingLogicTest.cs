@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BLL.Data_Objects;
+﻿using BLL.Data_Objects;
 using BLL.Logic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using System.Threading;
 
 namespace BLL.Test
 {
@@ -19,7 +14,7 @@ namespace BLL.Test
         {
             _logic = new LandingLogic();
         }
-        
+
         [TestMethod]
         public void StartLandingTest()
         {
@@ -39,10 +34,12 @@ namespace BLL.Test
         {
             // Arrange
             var landObj = new LandingObj("CantFinishDepartureTest");
-            _logic.StartLanding(landObj);
+
+            var result = _logic.StartLanding(landObj);
+            Assert.IsTrue(result);
 
             // Act - The flight just started it's path, therefor cant finish and returns false
-            var result = _logic.FinishLanding(landObj);
+            result = _logic.FinishLanding(landObj);
 
             // Assert
             Assert.IsFalse(result);
@@ -54,8 +51,10 @@ namespace BLL.Test
         {
             //Arrange - Remove all stations but the last one
             var landObj = new LandingObj("CanFinishDepartureTest");
-            _logic.StartLanding(landObj);
+            var result = _logic.StartLanding(landObj);
+            Assert.IsTrue(result);
             var currStation = landObj.StationsPath.Path.First;
+            
             while (currStation != null && currStation.Value != landObj.StationsPath.Path.Last.Value)
             {
                 var nextStation = currStation.Next;
@@ -65,7 +64,7 @@ namespace BLL.Test
             landObj.StationsPath.CurrentStation = currStation.Value;
 
             // Act
-            var result = _logic.FinishLanding(landObj);
+            result = _logic.FinishLanding(landObj);
 
             // Assert
             Assert.IsTrue(result);
