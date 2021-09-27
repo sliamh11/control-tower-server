@@ -8,7 +8,6 @@ namespace BLL.Test
     public class DepartureLogicTest
     {
         private readonly DepartureLogic _logic;
-        private const string _flightId = "flightTest";
 
         public DepartureLogicTest()
         {
