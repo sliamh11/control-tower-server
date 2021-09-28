@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Timers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BLL
 {
@@ -88,8 +89,10 @@ namespace BLL
         {
             if (_stationsState.CanAddFlight(FlightType.Departure))
             {
-                //ActivatorUtilities
-                var depObj = new DepartureObj(_provider, flightId);
+                var depLogic = _provider.GetRequiredService<IDepartureLogic>();
+                var stationsLogic = _provider.GetRequiredService<IStationsLogic>();
+
+                var depObj = new DepartureObj(depLogic, stationsLogic, flightId);
                 if (await depObj.Start())
                     return true;
             }
@@ -105,7 +108,10 @@ namespace BLL
         {
             if (_stationsState.CanAddFlight(FlightType.Landing))
             {
-                var landObj = new LandingObj(_provider, flightId);
+                var landLogic = _provider.GetRequiredService<ILandingLogic>();
+                var stationsLogic = _provider.GetRequiredService<IStationsLogic>();
+
+                var landObj = new LandingObj(landLogic, stationsLogic, flightId);
                 if (await landObj.Start())
                     return true;
             }

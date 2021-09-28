@@ -18,7 +18,7 @@ namespace BLL.Test
 
         public StationsLogicTest()
         {
-            _logic = new StationsLogic();
+            _logic = new StationsLogic(new StationsState());
         }
 
         [TestMethod]

@@ -12,7 +12,7 @@ namespace BLL.Test
 
         public DepartureLogicTest()
         {
-            _logic = new DepartureLogic(new StationsState() );
+            _logic = new DepartureLogic(new StationsState());
         }
 
         [TestMethod]
@@ -38,7 +38,7 @@ namespace BLL.Test
             Assert.IsTrue(result);
 
             // Act - The flight just started it's path, therefor cant finish and returns false
-            result = _logic.FinishDaperture(depObj); 
+            result = _logic.FinishDaperture(depObj);
 
             // Assert
             Assert.IsFalse(result);

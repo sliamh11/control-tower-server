@@ -30,10 +30,10 @@ namespace BLL.Data_Objects
         }
 
         // For DI - IServiceProvider as param to keep the DI graph connected.
-        public DepartureObj(IServiceProvider provider, string flightId = "") : this(flightId)
+        public DepartureObj(IDepartureLogic depLogic, IStationsLogic stationsLogic, string flightId = "") : this(flightId)
         {
-            _depLogic = provider.GetRequiredService<IDepartureLogic>();
-            _stationsLogic = provider.GetRequiredService<IStationsLogic>();
+            _depLogic = depLogic;
+            _stationsLogic = stationsLogic;
         }
 
         public async Task<bool> Start()

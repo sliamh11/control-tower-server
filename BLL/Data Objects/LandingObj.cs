@@ -30,10 +30,10 @@ namespace BLL.Data_Objects
         }
 
         // For DI - IServiceProvider as param to keep the DI graph connected.
-        public LandingObj(IServiceProvider provider, string flightId = "") : this(flightId)
+        public LandingObj(ILandingLogic landLogic, IStationsLogic stationsLogic, string flightId = "") : this(flightId)
         {
-            _landLogic = provider.GetRequiredService<ILandingLogic>();
-            _stationsLogic = provider.GetRequiredService<IStationsLogic>();
+            _landLogic = landLogic;
+            _stationsLogic = stationsLogic;
         }
 
         public async Task<bool> Start()

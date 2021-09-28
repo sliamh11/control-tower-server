@@ -12,7 +12,7 @@ namespace BLL.Test
 
         public LandingLogicTest()
         {
-            _logic = new LandingLogic();
+            _logic = new LandingLogic(new StationsState());
         }
 
         [TestMethod]
