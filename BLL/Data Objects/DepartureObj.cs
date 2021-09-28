@@ -23,7 +23,6 @@ namespace BLL.Data_Objects
         public StationsPathModel StationsPath { get; set; }
         #endregion
 
-
         // For params
         public DepartureObj(string flightId)
         {
@@ -56,7 +55,6 @@ namespace BLL.Data_Objects
             if (await _depLogic.FinishDapertureAsync(this))
             {
                 Debug.WriteLine($" ~~~ Flight {id} has finished landing proccess. ~~~");
-
                 _timer.Dispose();
                 return;
             }
@@ -64,7 +62,6 @@ namespace BLL.Data_Objects
             if (await _stationsLogic.MoveToNextStationAsync(this))
             {
                 Debug.WriteLine($"+++ Flight {id} has moved to station {StationsPath.CurrentStation.Number}. +++");
-
                 // Update the _periodTime to the station's StandbyTime.
                 _delayTime = StationsPath.CurrentStation.StandbyPeriod;
                 _timer.Change(_delayTime, _delayTime);
@@ -72,7 +69,6 @@ namespace BLL.Data_Objects
             else
             {
                 Debug.WriteLine($"--- Flight {id} was delayed. ---");
-
                 // Delay scedhualed take off time.
                 Flight.DepartureTime += _delayTime;
             }

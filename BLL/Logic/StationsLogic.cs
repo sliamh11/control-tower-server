@@ -15,7 +15,6 @@ namespace BLL.Logic
 
         public StationsLogic(IStationsState stationsState)
         {
-            //_stationsState = StationsState.Instance;
             _stationsState = stationsState;
         }
 

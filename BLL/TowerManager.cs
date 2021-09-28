@@ -2,10 +2,8 @@
 using BLL.Interfaces;
 using Common.Enums;
 using Common.Models;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -86,13 +84,12 @@ namespace BLL
 
         public IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState() => _stationsState.GetStationsState();
 
-        // The flight arrives to the function but still not shows, like the timer wouldn't even run. (maybe something with StartDepartureAsync function?)
         public async Task<bool> StartDepartureAsync(string flightId)
         {
             if (_stationsState.CanAddFlight(FlightType.Departure))
             {
                 //ActivatorUtilities
-                var depObj = new DepartureObj(_provider, flightId); // Works on another thread with a timer
+                var depObj = new DepartureObj(_provider, flightId);
                 if (await depObj.Start())
                     return true;
             }
@@ -108,7 +105,7 @@ namespace BLL
         {
             if (_stationsState.CanAddFlight(FlightType.Landing))
             {
-                var landObj = new LandingObj(_provider, flightId); // Works on another thread with a timer
+                var landObj = new LandingObj(_provider, flightId);
                 if (await landObj.Start())
                     return true;
             }

@@ -1,6 +1,7 @@
 ﻿using BLL.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Simulator;
+using Simulator.Interfaces;
 using System;
 using System.Threading.Tasks;
 
@@ -10,12 +11,12 @@ namespace Services.Controllers
     public class TowerController : Controller
     {
         private readonly ITowerManager _manager;
-        private readonly SimulatorManager _simulator;
+        private readonly ISimulatorManager _simulator;
 
-        public TowerController(ITowerManager manager)
+        public TowerController(ITowerManager manager, ISimulatorManager simulator)
         {
-            _simulator = SimulatorManager.Instance;
             _manager = manager;
+            _simulator = simulator;
         }
 
         [Route("")]
