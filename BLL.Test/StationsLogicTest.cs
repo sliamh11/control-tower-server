@@ -14,27 +14,27 @@ namespace BLL.Test
     [TestClass]
     public class StationsLogicTest
     {
-        private readonly StationsLogic _logic;
+        private readonly StationsLogic _stationsLogic;
+        private readonly StationsState _state;
 
         public StationsLogicTest()
         {
-            _logic = new StationsLogic(new StationsState());
+            _state = new StationsState();
+            _stationsLogic = new StationsLogic(_state);
         }
 
         [TestMethod]
         public async Task MoveLandingToNextStationTest()
         {
             // Arrange
-            var landObj = new LandingObj("MoveToNextStationTest");
+            var landObj = new LandingObj(new LandingLogic(_state),_stationsLogic,"MoveToNextStationTest");
             var result = await landObj.Start();
             Assert.IsTrue(result);
 
             // Act
-            // Activate the function
-            result = _logic.MoveToNextStation(landObj);
+            result = _stationsLogic.MoveToNextStation(landObj);
 
             // Assert
-            Thread.Sleep(1);
             Assert.IsTrue(result);
         }
 
@@ -42,13 +42,12 @@ namespace BLL.Test
         public async Task MoveDepartureToNextStationTest()
         {
             // Arrange
-            var depObj = new DepartureObj("MoveToNextStationTest");
+            var depObj = new DepartureObj(new DepartureLogic(_state), _stationsLogic,"MoveToNextStationTest");
             var result = await depObj.Start();
             Assert.IsTrue(result);
 
             // Act
-            // Activate the function
-            result = _logic.MoveToNextStation(depObj);
+            result = _stationsLogic.MoveToNextStation(depObj);
 
             // Assert
             Assert.IsTrue(result);

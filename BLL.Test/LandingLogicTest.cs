@@ -28,7 +28,7 @@ namespace BLL.Test
             Assert.IsTrue(result);
         }
 
-        // When flight is not at the last station
+        // When flight is NOT at the last station
         [TestMethod]
         public void CantFinishLandingTest()
         {
@@ -45,7 +45,7 @@ namespace BLL.Test
             Assert.IsFalse(result);
         }
 
-        // When flight is at the last station
+        // When flight is AT the last station
         [TestMethod]
         public void CanFinishLandingTest()
         {
