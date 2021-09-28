@@ -13,7 +13,6 @@ namespace BLL
         private readonly StationsGraph _stations;
         private readonly object _stationsLock = new object(); // For working with the data structure itself
         private readonly object _stateLock = new object(); // For state updates, etc.
-        private static readonly object _initLock = new object();
         private readonly object _getLandingLock = new object();
         private readonly object _getDepartureLock = new object();
 
