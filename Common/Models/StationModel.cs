@@ -5,6 +5,7 @@ namespace Common.Models
 {
     public class StationModel : IComparable<StationModel>
     {
+        // Maybe add string Id / StationId (so it wont collide with DB) - Guid.ToString()?
         public int Number;
         public int NextStation { get; set; }
         public FlightModel CurrentFlight { get; set; }

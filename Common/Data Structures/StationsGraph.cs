@@ -46,7 +46,7 @@ namespace Common.Data_Structures
 
             if (stationNum <= -1) // If default value (-1) - new station
             {
-                // Add a totaly new station and set it's number.
+                // Add a new station and set it's number.
                 foreach (var item in station)
                     item.Number = _stations.Count;
 
@@ -91,7 +91,7 @@ namespace Common.Data_Structures
         {
             var currStation = _stations[station.Number].Find(x => x == station);
             if (currStation == null)
-                return false;
+                throw new StationNotFoundException();
 
             currStation.CurrentFlight = null;
             return true;
@@ -269,24 +269,23 @@ namespace Common.Data_Structures
                 throw new StationNotFoundException();
 
             var targetStation = _stations[toStation.Number].Find(x => x == toStation);
-
-            // In case of Starting a landing / departure process.
-            if (fromStation == null && toStation != null)
-            {
-                if (targetStation == null)
-                    throw new StationNotFoundException();
-
-                targetStation.CurrentFlight = flight;
-                return true;
-            }
-
-            // At this point, fromStation must have a value.
-            if (fromStation == null)
+            if (targetStation == null)
                 throw new StationNotFoundException();
 
-            var startStation = _stations[fromStation.Number].Find(x => x == fromStation);
+            // In case of Starting a landing / departure process.
+            if (fromStation == null)
+            {
+                // If target station is empty
+                if (targetStation.CurrentFlight == null)
+                {
+                    targetStation.CurrentFlight = flight;
+                    return true;
+                }
+                return false;
+            }
 
-            if (startStation == null || targetStation == null)
+            var startStation = _stations[fromStation.Number].Find(x => x == fromStation);
+            if (startStation == null)
                 throw new StationNotFoundException();
 
             // If next station is empty - move the flight to it.
