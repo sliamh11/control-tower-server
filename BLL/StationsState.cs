@@ -25,20 +25,20 @@ namespace BLL
         private void LoadStations()
         {
             // Waiting stations
-            AddStation(new List<StationModel>(new StationModel[] { new StationModel(0, 1, new TimeSpan(0, 1, 0), StationType.Landing) }));
-            AddStation(new List<StationModel>(new StationModel[] { new StationModel(1, 2, new TimeSpan(0, 0, 45)) }));
-            AddStation(new List<StationModel>(new StationModel[] { new StationModel(2, 3, new TimeSpan(0, 0, 40)) }));
+            AddStation(new List<StationModel>(new StationModel[] { new StationModel(1, new TimeSpan(0, 1, 0),StationType.Landing) }));
+            AddStation(new List<StationModel>(new StationModel[] { new StationModel(2, new TimeSpan(0, 0, 45)) }));
+            AddStation(new List<StationModel>(new StationModel[] { new StationModel(3, new TimeSpan(0, 0, 40)) }));
             // Runway
-            AddStation(new List<StationModel>(new StationModel[] { new StationModel(3, 4, new TimeSpan(0, 1, 30), StationType.Runway) }));
+            AddStation(new List<StationModel>(new StationModel[] { new StationModel(4, new TimeSpan(0, 1, 30), StationType.Runway) }));
             // Airport & Depratures
             AddStation(new List<StationModel>(new StationModel[] {
-                new StationModel(4, 5, new TimeSpan(0, 0, 45)),
-                new StationModel(4, 6, new TimeSpan(0, 0, 45)) }));
-            AddStation(new List<StationModel>(new StationModel[] { new StationModel(5, 7, new TimeSpan(0, 1, 0),
+                new StationModel(5, new TimeSpan(0, 0, 45)),
+                new StationModel(6, new TimeSpan(0, 0, 45)) }));
+            AddStation(new List<StationModel>(new StationModel[] { new StationModel(7, new TimeSpan(0, 1, 0),
                 StationType.LandingExit, StationType.Departure) }));// Also has an exit
-            AddStation(new List<StationModel>(new StationModel[] { new StationModel(6, 7, new TimeSpan(0, 1, 0),
+            AddStation(new List<StationModel>(new StationModel[] { new StationModel(7, new TimeSpan(0, 1, 0),
                 StationType.LandingExit, StationType.Departure) }));// Also has an exit
-            AddStation(new List<StationModel>(new StationModel[] { new StationModel(7, 3, new TimeSpan(0, 0, 35)) })); // Station before runway.
+            AddStation(new List<StationModel>(new StationModel[] { new StationModel(3, new TimeSpan(0, 0, 35)) })); // Station before runway.
         }
 
         public void StateUpdated()
@@ -58,11 +58,11 @@ namespace BLL
             }
         }
 
-        public void AddStation(List<StationModel> newStation)
+        public bool AddStation(List<StationModel> newStation)
         {
             lock (_stationsLock)
             {
-                _stations.AddStation(newStation);
+                return _stations.AddStation(newStation);
             }
         }
 
@@ -116,11 +116,11 @@ namespace BLL
             return null;
         }
 
-        public void RemoveFlight(StationModel station)
+        public bool RemoveFlight(StationModel station)
         {
             lock (_stationsLock)
             {
-                _stations.RemoveFlight(station);
+                return _stations.RemoveFlight(station);
             }
         }
 

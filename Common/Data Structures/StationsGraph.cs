@@ -32,10 +32,33 @@ namespace Common.Data_Structures
 
         public IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState() => _stations;
 
-        // Add LandingStationsList & DepartureStationsList and save specific spots to make it easier and faster later on.
-        public void AddStation(List<StationModel> station)
+        // O(n*m)
+        public bool AddStation(List<StationModel> station)
         {
-            _stations.Add(station);
+            if (station == null || station.Count == 0)
+                throw new ArgumentException("Argument is invalid.");
+
+            var stationNum = station[0].Number;
+
+            // NextStation must be >= 0 & Specified number must be the same for all stations.
+            if (station.Any(x => x.NextStation < 0 || x.Number != stationNum))
+                return false;
+
+            if (stationNum <= -1) // If default value (-1) - new station
+            {
+                // Add a totaly new station and set it's number.
+                foreach (var item in station)
+                    item.Number = _stations.Count;
+
+                _stations.Add(station);
+            }
+            else
+            {
+                // Add to existing station
+                foreach (var item in station)
+                    _stations[stationNum].Add(item);
+            }
+
             // Add the relevant stations to the relevant lists
             foreach (var item in station)
             {
@@ -60,12 +83,18 @@ namespace Common.Data_Structures
                     }
                 }
             }
+            return true;
         }
 
         // O(n)
-        public void RemoveFlight(StationModel station)
+        public bool RemoveFlight(StationModel station)
         {
-            _stations[station.Number].Find(x => x == station).CurrentFlight = null;
+            var currStation = _stations[station.Number].Find(x => x == station);
+            if (currStation == null)
+                return false;
+
+            currStation.CurrentFlight = null;
+            return true;
         }
 
         // O(n)
@@ -172,7 +201,7 @@ namespace Common.Data_Structures
             table[startIndex].Weight = new TimeSpan(0);
         }
 
-        // O(n)
+        // O(n*m)
         private void FillStationsTable(int index, StationsTable[] table)
         {
             while (table.Any(table => !table.IsVisited))
@@ -194,7 +223,7 @@ namespace Common.Data_Structures
             }
         }
 
-        // O(n)
+        // O(n*m)
         private void FillStationsTable(int index, StationsTable[] table, StationModel startStation, StationModel targetStation)
         {
             while (table.Any(table => !table.IsVisited))

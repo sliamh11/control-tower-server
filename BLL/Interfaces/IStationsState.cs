@@ -9,13 +9,13 @@ namespace BLL.Interfaces
     {
         void StateUpdated();
         IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState();
-        void AddStation(List<StationModel> newStation);
+        bool AddStation(List<StationModel> newStation);
         bool IsStationEmpty(StationModel station);
         StationsPathModel FindFastestPath(int startIndex, int targetIndex);
         StationsPathModel FindFastestPath(StationModel currStation, StationModel targetStation);
         bool MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight);
         Tuple<StationModel, StationModel> GetPathEdgeStations(FlightModel flight);
-        void RemoveFlight(StationModel station);
+        bool RemoveFlight(StationModel station);
         bool CanAddFlight(FlightType type);
     }
 }

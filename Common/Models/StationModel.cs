@@ -5,28 +5,33 @@ namespace Common.Models
 {
     public class StationModel : IComparable<StationModel>
     {
-        public readonly int Number;
+        public int Number;
         public int NextStation { get; set; }
         public FlightModel CurrentFlight { get; set; }
         public StationType[] Types { get; set; }
         public StationStatuses Status { get; set; }
         public TimeSpan StandbyPeriod { get; set; }
 
-        public StationModel(int stationNumber, int nextStation, TimeSpan standBy, params StationType[] types)
+        public StationModel(int nextStation, TimeSpan standBy, params StationType[] types)
         {
-            Number = stationNumber;
+            Number = -1; // Default value.
             NextStation = nextStation;
             StandbyPeriod = standBy;
             if (types == null)
             {
                 Types = new StationType[1];
-                Types[0] = StationType.Normal; // Default value if not entered
+                Types[0] = StationType.Normal; // Default value.
             }
             else
             {
                 Types = new StationType[types.Length];
                 Types = types;
             }
+        }
+
+        public StationModel(int existingStation, int nextStation, TimeSpan standBy, params StationType[] types) : this(nextStation, standBy, types)
+        {
+            Number = existingStation;
         }
 
         public int CompareTo(StationModel other)
