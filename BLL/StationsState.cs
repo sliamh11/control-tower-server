@@ -7,10 +7,9 @@ using System.Collections.Generic;
 
 namespace BLL
 {
-    // Holds the Data Structure in a Singleton instance.
+    // Holds the Data Structure (is singleton).
     public class StationsState : IStationsState
     {
-        private static StationsState _instance;
         private readonly StationsGraph _stations;
         private readonly object _stationsLock = new object(); // For working with the data structure itself
         private readonly object _stateLock = new object(); // For state updates, etc.
@@ -18,24 +17,10 @@ namespace BLL
         private readonly object _getLandingLock = new object();
         private readonly object _getDepartureLock = new object();
 
-        private StationsState()
+        public StationsState()
         {
             _stations = new StationsGraph();
             LoadStations();
-        }
-
-        public static StationsState Instance
-        {
-            get
-            {
-                lock (_initLock)
-                {
-                    if (_instance == null)
-                        _instance = new StationsState();
-
-                    return _instance;
-                }
-            }
         }
 
         private void LoadStations()

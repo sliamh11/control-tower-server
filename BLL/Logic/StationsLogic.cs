@@ -7,15 +7,16 @@ using System.Threading.Tasks;
 namespace BLL.Logic
 {
     /// <summary>
-    /// A class for generic functions which are shared between Departure & Landing objects.
+    /// A class for similiar functionality of Departure & Landing objects.
     /// </summary>
     public class StationsLogic : IStationsLogic
     {
         private readonly IStationsState _stationsState;
 
-        public StationsLogic()
+        public StationsLogic(IStationsState stationsState)
         {
-            _stationsState = StationsState.Instance;
+            //_stationsState = StationsState.Instance;
+            _stationsState = stationsState;
         }
 
         private bool CanMoveToNextStation(IDataObj dataObj)

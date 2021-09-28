@@ -12,7 +12,7 @@ namespace BLL.Test
 
         public DepartureLogicTest()
         {
-            _logic = new DepartureLogic();
+            _logic = new DepartureLogic(new StationsState() );
         }
 
         [TestMethod]

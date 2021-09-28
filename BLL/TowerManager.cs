@@ -2,6 +2,7 @@
 using BLL.Interfaces;
 using Common.Enums;
 using Common.Models;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,12 +14,17 @@ namespace BLL
     public class TowerManager : ITowerManager
     {
         private IStationsState _stationsState;
+        private IServiceProvider _provider;
         private LinkedList<FlightModel> _waitingFlightsList;
         private Timer _queueTimer;
 
-        public TowerManager()
+        public TowerManager(IServiceProvider provider, IStationsState stationsState)
         {
-            _stationsState = StationsState.Instance;
+            // Providers
+            _stationsState = stationsState;
+            _provider = provider;
+
+            // Init timer
             _waitingFlightsList = new LinkedList<FlightModel>();
             _queueTimer = new Timer(30000); // 30 Seconds
             _queueTimer.Elapsed += (s, e) => OnTimerElapsed();
@@ -85,7 +91,8 @@ namespace BLL
         {
             if (_stationsState.CanAddFlight(FlightType.Departure))
             {
-                var depObj = new DepartureObj(flightId); // Works on another thread with a timer
+                //ActivatorUtilities
+                var depObj = new DepartureObj(_provider, flightId); // Works on another thread with a timer
                 if (await depObj.Start())
                     return true;
             }
@@ -101,7 +108,7 @@ namespace BLL
         {
             if (_stationsState.CanAddFlight(FlightType.Landing))
             {
-                var landObj = new LandingObj(flightId); // Works on another thread with a timer
+                var landObj = new LandingObj(_provider, flightId); // Works on another thread with a timer
                 if (await landObj.Start())
                     return true;
             }

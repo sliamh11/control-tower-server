@@ -29,11 +29,8 @@ namespace Services
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddSingleton<ITowerManager, TowerManager>();
-
-            // If ill use them in an API - I'll add them
-            //services.AddScoped<ILandingLogic, LandingLogic>();
-            //services.AddScoped<IDepartureLogic, DepartureLogic>();
+            services.AddLogicDependancies();
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

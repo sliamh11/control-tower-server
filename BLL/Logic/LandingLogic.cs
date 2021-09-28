@@ -9,9 +9,10 @@ namespace BLL.Logic
     public class LandingLogic : ILandingLogic
     {
         private IStationsState _stationsState;
-        public LandingLogic()
+        public LandingLogic(IStationsState stationsState)
         {
-            _stationsState = StationsState.Instance;
+            //_stationsState = StationsState.Instance;
+            _stationsState = stationsState;
         }
 
         public bool StartLanding(LandingObj landingObj)

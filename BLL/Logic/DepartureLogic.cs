@@ -9,9 +9,10 @@ namespace BLL.Logic
     public class DepartureLogic : IDepartureLogic
     {
         private IStationsState _stationsState;
-        public DepartureLogic()
+        public DepartureLogic(IStationsState state)
         {
-            _stationsState = StationsState.Instance;
+            _stationsState = state;
+            //_stationsState = StationsState.Instance;
         }
 
         public bool StartDeparture(DepartureObj departureObj)
