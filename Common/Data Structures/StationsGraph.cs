@@ -124,9 +124,11 @@ namespace Common.Data_Structures
             if (stations == null || stations.FirstOrDefault() == null)
                 return null;
 
-            return stations.Where(x => isEmptyStation ? x.CurrentFlight == null : true)
-                .Aggregate((minStandbyStation, station) =>
-                station.StandbyPeriod < (minStandbyStation?.StandbyPeriod ?? station.StandbyPeriod) ? station : minStandbyStation);
+            var list = stations.Where(x => isEmptyStation ? x.CurrentFlight == null : true);
+            return list.Any()
+                ? list.Aggregate((minStandbyStation, station) =>
+                station.StandbyPeriod < (minStandbyStation?.StandbyPeriod ?? station.StandbyPeriod) ? station : minStandbyStation)
+                : null;
         }
 
         // O(1)
@@ -260,8 +262,11 @@ namespace Common.Data_Structures
         // O(1)
         public bool MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight)
         {
-            if (toStation == null)
-                throw new StationNotFoundException();
+            if (toStation == null
+                || flight == null
+                || ((toStation.Number < 0 || toStation.Number >= _stations.Count))
+                || (fromStation != null && (fromStation.Number < 0 || fromStation.Number >= _stations.Count)))
+                throw new ArgumentException();
 
             var targetStation = _stations[toStation.Number].GetValueOrDefault(toStation.StationId);
             if (targetStation == null)
@@ -301,12 +306,12 @@ namespace Common.Data_Structures
                 return null;
 
             TimeSpan pathTime = new TimeSpan(0);
-            var pathStack = new Stack<StationModel>(_stations.Count);
+            var pathStack = new Stack<StationModel>();
             int tempIndex = targetIndex;
 
             while (table[tempIndex].PrevStation != null)
             {
-                pathStack.Push(table[tempIndex].PrevStation);
+                pathStack.Push(table[tempIndex].PrevStation); // Something crashes here when testing
                 tempIndex = table[tempIndex].PrevStation.Number;
             }
 
