@@ -8,8 +8,8 @@ namespace BLL.Interfaces
     public interface IStationsState
     {
         void StateUpdated();
-        IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState();
-        bool AddStation(List<StationModel> newStation);
+        IReadOnlyList<IReadOnlyDictionary<string,StationModel>> GetStationsState();
+        bool AddStation(Dictionary<string,StationModel> newStations);
         bool IsStationEmpty(StationModel station);
         StationsPathModel FindFastestPath(int startIndex, int targetIndex);
         StationsPathModel FindFastestPath(StationModel currStation, StationModel targetStation);
@@ -17,5 +17,6 @@ namespace BLL.Interfaces
         Tuple<StationModel, StationModel> GetPathEdgeStations(FlightModel flight);
         bool RemoveFlight(StationModel station);
         bool CanAddFlight(FlightType type);
+        bool UpdateStation(StationModel updatedStation);
     }
 }

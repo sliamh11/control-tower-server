@@ -75,15 +75,15 @@ namespace BLL
             }
         }
 
-        public void AddStation(List<StationModel> newStation)
+        public bool AddStation(Dictionary<string,StationModel> newStations)
         {
-            if (newStation == null || newStation.Count == 0)
+            if (newStations == null || newStations.Count == 0)
                 throw new ArgumentException("New station is not valid.");
-
-            _stationsState.AddStation(newStation);
+            
+            return _stationsState.AddStation(newStations);
         }
 
-        public IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState() => _stationsState.GetStationsState();
+        public IReadOnlyList<IReadOnlyDictionary<string,StationModel>> GetStationsState() => _stationsState.GetStationsState();
 
         public async Task<bool> StartDepartureAsync(string flightId)
         {

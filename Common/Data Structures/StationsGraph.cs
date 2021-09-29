@@ -10,12 +10,11 @@ namespace Common.Data_Structures
 {
     public class StationsGraph
     {
-        // Reasons for List over LinkedList
-        // 1. I would use LinkedList if I needed to add and remove items frequently, which I don't.
+        // Reasons for List of Dictionaries
+        // 1. Direct Access to list (via station number), then inner search by StationId - O(1)
         // 2. Easy to control a list's size (mostly O(1), when needed to expend - O(n)).
-        // 3. Can access directly by index with O(1).
 
-        private readonly List<List<StationModel>> _stations;
+        private readonly List<Dictionary<string, StationModel>> _stations;
         private LinkedList<StationModel> _startLandingStations;
         private LinkedList<StationModel> _startDepartureStations;
         private LinkedList<StationModel> _endLandingStations;
@@ -23,31 +22,31 @@ namespace Common.Data_Structures
 
         public StationsGraph()
         {
-            _stations = new List<List<StationModel>>(15); // Base size will be 15 (instead of 4 in meta-deta -> less array-overriding)
+            _stations = new List<Dictionary<string, StationModel>>(15); // Base size will be 15 (instead of 4 in meta-deta -> less array-overriding)
             _startLandingStations = new LinkedList<StationModel>();
             _startDepartureStations = new LinkedList<StationModel>();
             _endLandingStations = new LinkedList<StationModel>();
             _endDepartureStations = new LinkedList<StationModel>();
         }
 
-        public IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState() => _stations;
+        public IReadOnlyList<IReadOnlyDictionary<string, StationModel>> GetStationsState() => _stations;
 
         // O(n*m)
-        public bool AddStation(List<StationModel> station)
+        public bool AddStation(Dictionary<string, StationModel> station)
         {
             if (station == null || station.Count == 0)
                 throw new ArgumentException("Argument is invalid.");
 
-            var stationNum = station[0].Number;
+            var stationNum = station.First().Value.Number;
 
             // NextStation must be >= 0 & Specified number must be the same for all stations.
-            if (station.Any(x => x.NextStation < 0 || x.Number != stationNum))
+            if (station.Values.Any(x => x.NextStation < 0 || x.Number != stationNum))
                 return false;
 
             if (stationNum <= -1) // If default value (-1) - new station
             {
                 // Add a new station and set it's number.
-                foreach (var item in station)
+                foreach (var item in station.Values)
                     item.Number = _stations.Count;
 
                 _stations.Add(station);
@@ -55,12 +54,12 @@ namespace Common.Data_Structures
             else
             {
                 // Add to existing station
-                foreach (var item in station)
-                    _stations[stationNum].Add(item);
+                foreach (var item in station.Values)
+                    _stations[stationNum].TryAdd(item.StationId, item); // Will not add a duplicated station
             }
 
             // Add the relevant stations to the relevant lists
-            foreach (var item in station)
+            foreach (var item in station.Values)
             {
                 foreach (var type in item.Types)
                 {
@@ -86,15 +85,15 @@ namespace Common.Data_Structures
             return true;
         }
 
-        // O(n)
+        // O(1)
         public bool RemoveFlight(StationModel station)
         {
-            var currStation = _stations[station.Number].Find(x => x == station);
-            if (currStation == null)
-                throw new StationNotFoundException();
-
-            currStation.CurrentFlight = null;
-            return true;
+            if (_stations[station.Number].TryGetValue(station.StationId, out station))
+            {
+                station.CurrentFlight = null;
+                return true;
+            }
+            throw new StationNotFoundException();
         }
 
         // O(n)
@@ -130,15 +129,12 @@ namespace Common.Data_Structures
                 station.StandbyPeriod < (minStandbyStation?.StandbyPeriod ?? station.StandbyPeriod) ? station : minStandbyStation);
         }
 
-        // O(n)
+        // O(1)
         public bool UpdateStation(StationModel updatedStation)
         {
-            var station = _stations[updatedStation.Number];
-            int index = station.IndexOf(updatedStation); // Compares with .Equals() (Checks station's content)
-            //int index = station.FindIndex(station => station.CompareTo(updatedStation) == 0);
-            if (index >= 0)
+            if (_stations[updatedStation.Number].TryGetValue(updatedStation.StationId, out StationModel existingStation))
             {
-                station[index] = updatedStation; // Should work (is by reference), if not - change the _stations directly
+                _stations[existingStation.Number][existingStation.StationId] = updatedStation;
                 return true;
             }
             return false;
@@ -148,19 +144,14 @@ namespace Common.Data_Structures
         public bool CanAddFlight(FlightType type)
         {
             var list = type == FlightType.Departure ? _startDepartureStations : _startLandingStations;
-            foreach (var item in list)
-            {
-                if (item.CurrentFlight == null)
-                    return true;
-            }
-            return false;
+            return list.Any(x => x.CurrentFlight == null);
         }
 
         // Dijakstra's algo
         public StationsPathModel FindFastestPath(int startIndex, int targetIndex)
         {
             if (startIndex < 0 || startIndex >= _stations.Count
-                || targetIndex <= 0 || targetIndex >= _stations.Count)
+                || targetIndex < 0 || targetIndex >= _stations.Count)
                 throw new ArgumentOutOfRangeException("Start index was out of the array's boundries.");
 
             StationsTable[] table = new StationsTable[_stations.Count];
@@ -176,8 +167,12 @@ namespace Common.Data_Structures
             int targetIndex = targetStation.Number;
 
             if (startIndex < 0 || startIndex >= _stations.Count
-               || targetIndex <= 0 || targetIndex >= _stations.Count)
-                throw new ArgumentOutOfRangeException("Start index was out of the array's boundries.");
+               || targetIndex < 0 || targetIndex >= _stations.Count)
+                throw new ArgumentException("One of the stations isn't valid.");
+
+            if (!_stations[startIndex].TryGetValue(startStation.StationId, out StationModel stationA)
+                || !_stations[targetIndex].TryGetValue(targetStation.StationId, out StationModel stationB))
+                throw new StationNotFoundException();
 
             StationsTable[] table = new StationsTable[_stations.Count];
             InitStationsTable(table, startIndex);
@@ -208,7 +203,7 @@ namespace Common.Data_Structures
             {
                 table[index].IsVisited = true;
 
-                foreach (var item in _stations[index])
+                foreach (var item in _stations[index].Values)
                 {
                     TimeSpan newWeight = table[index].Weight + item.StandbyPeriod;
                     var destTable = table[item.NextStation];
@@ -246,7 +241,7 @@ namespace Common.Data_Structures
                 }
                 else
                 {
-                    foreach (var item in _stations[index])
+                    foreach (var item in _stations[index].Values)
                     {
                         TimeSpan newWeight = table[index].Weight + item.StandbyPeriod;
                         var destTable = table[item.NextStation];
@@ -262,13 +257,13 @@ namespace Common.Data_Structures
             }
         }
 
-        // O(n)
+        // O(1)
         public bool MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight)
         {
             if (toStation == null)
                 throw new StationNotFoundException();
 
-            var targetStation = _stations[toStation.Number].Find(x => x == toStation);
+            var targetStation = _stations[toStation.Number].GetValueOrDefault(toStation.StationId);
             if (targetStation == null)
                 throw new StationNotFoundException();
 
@@ -284,7 +279,7 @@ namespace Common.Data_Structures
                 return false;
             }
 
-            var startStation = _stations[fromStation.Number].Find(x => x == fromStation);
+            var startStation = _stations[fromStation.Number].GetValueOrDefault(fromStation.StationId);
             if (startStation == null)
                 throw new StationNotFoundException();
 
@@ -301,13 +296,12 @@ namespace Common.Data_Structures
         // O(n) 
         private StationsPathModel GetFastestPath(int targetIndex, StationsTable[] table)
         {
-            // Note: why do I search for the last station here and not in dijakstra?
-            // Answer: Because when I tried to convert dijakstra to work that way it began to be inefficient (it works by indexs and not objects, therefor i can only get the next station's index, not the specific object).
+            // If path not found
             if (table[targetIndex].PrevStation == null)
                 return null;
 
             TimeSpan pathTime = new TimeSpan(0);
-            Stack<StationModel> pathStack = new Stack<StationModel>();
+            var pathStack = new Stack<StationModel>(_stations.Count);
             int tempIndex = targetIndex;
 
             while (table[tempIndex].PrevStation != null)
@@ -325,8 +319,10 @@ namespace Common.Data_Structures
                 stations.AddLast(station);
             }
 
+            // Note: why do I search for the last station here and not in dijakstra?
+            // Answer: Because when I tried to convert dijakstra to work that way it began to be inefficient (its based on previous indexs, therefor I can only get the next station's index, not the specific object).
             // Find the target station by minimum standby time - O(n)
-            StationModel lastStation = GetFastestStation(_stations[targetIndex]);
+            StationModel lastStation = GetFastestStation(_stations[targetIndex].Values);
 
             stations.AddLast(lastStation);
             pathTime += lastStation.StandbyPeriod;
@@ -334,10 +330,13 @@ namespace Common.Data_Structures
             return new StationsPathModel(stations, pathTime);
         }
 
-        // O(n)
+        // O(1)
         public bool IsStationEmpty(StationModel station)
         {
-            var currStation = _stations[station.Number].Find(x => x == station);
+            if (station.Number < 0 || station.Number >= _stations.Count)
+                throw new ArgumentException();
+
+            var currStation = _stations[station.Number].GetValueOrDefault(station.StationId);
             if (currStation == null)
                 throw new StationNotFoundException();
 

@@ -5,8 +5,9 @@ namespace Common.Models
 {
     public class StationModel : IComparable<StationModel>
     {
-        // Maybe add string Id / StationId (so it wont collide with DB) - Guid.ToString()?
-        public int Number;
+        //[Key]
+        public string StationId { get; private set; } // Competible with EF -> some say internal and not private, check
+        public int Number { get; set; }
         public int NextStation { get; set; }
         public FlightModel CurrentFlight { get; set; }
         public StationType[] Types { get; set; }
@@ -15,6 +16,7 @@ namespace Common.Models
 
         public StationModel(int nextStation, TimeSpan standBy, params StationType[] types)
         {
+            StationId = Guid.NewGuid().ToString();
             Number = -1; // Default value.
             NextStation = nextStation;
             StandbyPeriod = standBy;

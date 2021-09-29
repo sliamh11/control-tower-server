@@ -24,21 +24,31 @@ namespace BLL
 
         private void LoadStations()
         {
-            // Waiting stations
-            AddStation(new List<StationModel>(new StationModel[] { new StationModel(1, new TimeSpan(0, 1, 0),StationType.Landing) }));
-            AddStation(new List<StationModel>(new StationModel[] { new StationModel(2, new TimeSpan(0, 0, 45)) }));
-            AddStation(new List<StationModel>(new StationModel[] { new StationModel(3, new TimeSpan(0, 0, 40)) }));
+            // Normal stations
+            var station = new StationModel(1, new TimeSpan(0, 1, 0), StationType.Landing);
+            AddStation(new Dictionary<string, StationModel>() { { station.StationId, station } });
+            station = new StationModel(2, new TimeSpan(0, 0, 45));
+            AddStation(new Dictionary<string, StationModel>() { { station.StationId, station } });
+            station = new StationModel(3, new TimeSpan(0, 0, 40));
+            AddStation(new Dictionary<string, StationModel>() { { station.StationId, station } });
+
             // Runway
-            AddStation(new List<StationModel>(new StationModel[] { new StationModel(4, new TimeSpan(0, 1, 30), StationType.Runway) }));
+            station = new StationModel(4, new TimeSpan(0, 1, 30), StationType.Runway);
+            AddStation(new Dictionary<string, StationModel>() { { station.StationId, station } });
+
             // Airport & Depratures
-            AddStation(new List<StationModel>(new StationModel[] {
-                new StationModel(5, new TimeSpan(0, 0, 45)),
-                new StationModel(6, new TimeSpan(0, 0, 45)) }));
-            AddStation(new List<StationModel>(new StationModel[] { new StationModel(7, new TimeSpan(0, 1, 0),
-                StationType.LandingExit, StationType.Departure) }));// Also has an exit
-            AddStation(new List<StationModel>(new StationModel[] { new StationModel(7, new TimeSpan(0, 1, 0),
-                StationType.LandingExit, StationType.Departure) }));// Also has an exit
-            AddStation(new List<StationModel>(new StationModel[] { new StationModel(3, new TimeSpan(0, 0, 35)) })); // Station before runway.
+            station = new StationModel(5, new TimeSpan(0, 0, 45));
+            var stationB = new StationModel(6, new TimeSpan(0, 0, 45));
+            AddStation(new Dictionary<string, StationModel>() {
+                { station.StationId, station },
+                {stationB.StationId, stationB }
+            });
+            station = new StationModel(7, new TimeSpan(0, 1, 0), StationType.LandingExit, StationType.Departure);
+            AddStation(new Dictionary<string, StationModel>() { { station.StationId, station } }); // Also has an exit
+            station = new StationModel(7, new TimeSpan(0, 1, 0), StationType.LandingExit, StationType.Departure);
+            AddStation(new Dictionary<string, StationModel>() { { station.StationId, station } }); // Also has an exit
+            station = new StationModel(3, new TimeSpan(0, 0, 35));
+            AddStation(new Dictionary<string, StationModel>() { { station.StationId, station } }); // Station before runway.
         }
 
         public void StateUpdated()
@@ -50,52 +60,40 @@ namespace BLL
             throw new NotImplementedException();
         }
 
-        public IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState()
+        public IReadOnlyList<IReadOnlyDictionary<string, StationModel>> GetStationsState()
         {
             lock (_stationsLock)
-            {
                 return _stations.GetStationsState();
-            }
         }
 
-        public bool AddStation(List<StationModel> newStation)
+        public bool AddStation(Dictionary<string, StationModel> newStations)
         {
             lock (_stationsLock)
-            {
-                return _stations.AddStation(newStation);
-            }
+                return _stations.AddStation(newStations);
         }
 
         public bool IsStationEmpty(StationModel station)
         {
             lock (_stationsLock)
-            {
                 return _stations.IsStationEmpty(station);
-            }
         }
 
         public StationsPathModel FindFastestPath(int startIndex, int targetIndex)
         {
             lock (_stationsLock)
-            {
                 return _stations.FindFastestPath(startIndex, targetIndex);
-            }
         }
 
         public StationsPathModel FindFastestPath(StationModel currStation, StationModel targetStation)
         {
             lock (_stationsLock)
-            {
                 return _stations.FindFastestPath(currStation, targetStation);
-            }
         }
 
         public bool MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight)
         {
             lock (_stationsLock)
-            {
                 return _stations.MoveToStation(fromStation, toStation, flight);
-            }
         }
 
         public Tuple<StationModel, StationModel> GetPathEdgeStations(FlightModel flight)
@@ -119,9 +117,7 @@ namespace BLL
         public bool RemoveFlight(StationModel station)
         {
             lock (_stationsLock)
-            {
                 return _stations.RemoveFlight(station);
-            }
         }
 
         public bool CanAddFlight(FlightType type)
@@ -138,12 +134,10 @@ namespace BLL
             }
         }
 
-        //public bool UpdateStation(StationModel updatedStation)
-        //{
-        //    lock (_stationsLock)
-        //    {
-
-        //    }
-        //}
+        public bool UpdateStation(StationModel updatedStation)
+        {
+            lock (_stationsLock)
+                return _stations.UpdateStation(updatedStation);
+        }
     }
 }

@@ -7,9 +7,9 @@ namespace BLL.Interfaces
 {
     public interface ITowerManager
     {
-        void AddStation(List<StationModel> newStation);
+        bool AddStation(Dictionary<string,StationModel> newStations);
         Task<bool> StartDepartureAsync(string flightId);
         Task<bool> StartLandingAsync(string flightId);
-        IReadOnlyList<IReadOnlyList<StationModel>> GetStationsState();
+        IReadOnlyList<IReadOnlyDictionary<string, StationModel>> GetStationsState();
     }
 }

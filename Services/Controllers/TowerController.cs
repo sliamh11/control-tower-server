@@ -53,5 +53,7 @@ namespace Services.Controllers
                 return BadRequest($"Exception: {ex.Message}");
             }
         }
+
+        // AddStation - gets a list of objects from body as JSON and is translated to a StationModels, and then to a dictionary
     }
 }

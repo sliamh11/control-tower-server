@@ -8,7 +8,6 @@ using BLL.Data_Objects;
 using BLL.Logic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-
 namespace BLL.Test
 {
     [TestClass]
