@@ -1,6 +1,7 @@
 ﻿using Common.Enums;
 using Common.Exceptions;
 using Common.Models;
+using Common.Structs;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -97,25 +98,25 @@ namespace Common.Data_Structures
         }
 
         // O(n)
-        public Tuple<StationModel, StationModel> GetLandingEdgeStations()
+        public PathEdgesStruct GetLandingEdgeStations()
         {
             var startingPoint = GetFastestStation(_startLandingStations, true);
             var endingPoint = GetFastestStation(_endLandingStations);
 
             return startingPoint == null || endingPoint == null
-                ? null
-                : new Tuple<StationModel, StationModel>(startingPoint, endingPoint);
+                ? default
+                : new PathEdgesStruct(startingPoint, endingPoint);
         }
 
         // O(n)
-        public Tuple<StationModel, StationModel> GetDepartureEdgeStations()
+        public PathEdgesStruct GetDepartureEdgeStations()
         {
             var startingPoint = GetFastestStation(_startDepartureStations, true);
             var endingPoint = GetFastestStation(_endDepartureStations);
 
             return startingPoint == null || endingPoint == null
-                ? null
-                : new Tuple<StationModel, StationModel>(startingPoint, endingPoint);
+                ? default
+                : new PathEdgesStruct(startingPoint, endingPoint);
         }
 
         // O(n)

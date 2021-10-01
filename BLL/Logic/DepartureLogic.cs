@@ -12,24 +12,23 @@ namespace BLL.Logic
         public DepartureLogic(IStationsState state)
         {
             _stationsState = state;
-            //_stationsState = StationsState.Instance;
         }
 
         public bool StartDeparture(DepartureObj departureObj)
         {
             // 'Fastest' start & end points (by StandbyPeriod)
             var pathEdges = _stationsState.GetPathEdgeStations(departureObj.Flight);
-            if (pathEdges == null)
+            if (pathEdges.StartStation == null || pathEdges.EndStation == null)
                 return false;
 
             // Fastest path between the points
-            var path = _stationsState.FindFastestPath(pathEdges.Item1, pathEdges.Item2);
+            var path = _stationsState.FindFastestPath(pathEdges.StartStation, pathEdges.EndStation);
             if (path == null)
                 return false;
 
             departureObj.StationsPath = path;
             departureObj.Flight.DepartureTime = DateTime.Now + departureObj.StationsPath.OverallTime;
-            return _stationsState.MoveToStation(null, pathEdges.Item1, departureObj.Flight);
+            return _stationsState.MoveToStation(null, pathEdges.StartStation, departureObj.Flight);
         }
         public async Task<bool> StartDepartureAsync(DepartureObj departureObj)
         {

@@ -1,5 +1,6 @@
 ﻿using Common.Enums;
 using Common.Models;
+using Common.Structs;
 using System;
 using System.Collections.Generic;
 
@@ -14,7 +15,7 @@ namespace BLL.Interfaces
         StationsPathModel FindFastestPath(int startIndex, int targetIndex);
         StationsPathModel FindFastestPath(StationModel currStation, StationModel targetStation);
         bool MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight);
-        Tuple<StationModel, StationModel> GetPathEdgeStations(FlightModel flight);
+        PathEdgesStruct GetPathEdgeStations(FlightModel flight);
         bool RemoveFlight(StationModel station);
         bool CanAddFlight(FlightType type);
         bool UpdateStation(StationModel updatedStation);

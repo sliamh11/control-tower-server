@@ -2,6 +2,7 @@
 using Common.Data_Structures;
 using Common.Enums;
 using Common.Models;
+using Common.Structs;
 using System;
 using System.Collections.Generic;
 
@@ -96,22 +97,16 @@ namespace BLL
                 return _stations.MoveToStation(fromStation, toStation, flight);
         }
 
-        public Tuple<StationModel, StationModel> GetPathEdgeStations(FlightModel flight)
+        public PathEdgesStruct GetPathEdgeStations(FlightModel flight)
         {
-            // If returns null - no available station for now -> put in queue or something.
             if (flight.Type == FlightType.Landing)
             {
                 lock (_getLandingLock)
                     return _stations.GetLandingEdgeStations();
             }
 
-            if (flight.Type == FlightType.Departure)
-            {
-                lock (_getDepartureLock)
-                    return _stations.GetDepartureEdgeStations();
-            }
-
-            return null;
+            lock (_getDepartureLock)
+                return _stations.GetDepartureEdgeStations();
         }
 
         public bool RemoveFlight(StationModel station)

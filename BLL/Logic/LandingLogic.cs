@@ -19,17 +19,17 @@ namespace BLL.Logic
         {
             // 'Fastest' start & end points (by StandbyPeriod)
             var pathEdges = _stationsState.GetPathEdgeStations(landingObj.Flight);
-            if (pathEdges == null)
+            if (pathEdges.StartStation == null)
                 return false;
 
             // Fastest path between the points
-            var path = _stationsState.FindFastestPath(pathEdges.Item1, pathEdges.Item2);
+            var path = _stationsState.FindFastestPath(pathEdges.StartStation, pathEdges.EndStation);
             if (path == null)
                 return false;
 
             landingObj.StationsPath = path;
             landingObj.Flight.LandingTime = DateTime.Now + landingObj.StationsPath.OverallTime;
-            _stationsState.MoveToStation(null, pathEdges.Item1, landingObj.Flight);
+            _stationsState.MoveToStation(null, pathEdges.StartStation, landingObj.Flight);
             return true;
         }
         public async Task<bool> StartLandingAsync(LandingObj landingObj)

@@ -235,24 +235,26 @@ namespace BLL.Test
 
             // Test 1: When LandingFlight gets 2 points
             var edges = state.GetPathEdgeStations(landingFlight);
-            Assert.IsNotNull(edges);
+            Assert.IsNotNull(edges.StartStation);
+            Assert.IsNotNull(edges.EndStation);
 
             // Test 2: When there's no room for a flight (returns null)
-            state.MoveToStation(null, edges.Item1, landingFlight);
+            state.MoveToStation(null, edges.StartStation, landingFlight);
             edges = state.GetPathEdgeStations(landingFlight);
-            Assert.IsNull(edges);
+            Assert.IsNull(edges.StartStation);
 
             // Test 3: When DepartureFlight gets 2 points
             var departureFlight = new FlightModel("departure", FlightType.Departure);
             edges = state.GetPathEdgeStations(departureFlight);
-            Assert.IsNotNull(edges);
+            Assert.IsNotNull(edges.StartStation);
+            Assert.IsNotNull(edges.EndStation);
 
             // Test 4: When there's no available points for a departure flight. (2 initial stations for departure)
-            state.MoveToStation(null, edges.Item1, departureFlight);
+            state.MoveToStation(null, edges.StartStation, departureFlight);
             edges = state.GetPathEdgeStations(departureFlight);
-            state.MoveToStation(null, edges.Item1, departureFlight);
+            state.MoveToStation(null, edges.StartStation, departureFlight);
             edges = state.GetPathEdgeStations(departureFlight);
-            Assert.IsNull(edges);
+            Assert.IsNull(edges.StartStation);
         }
 
         [TestMethod]
@@ -301,10 +303,10 @@ namespace BLL.Test
 
             // Test 2: When theres no spot for a new landing proccess
             var landingEdges = state.GetPathEdgeStations(landingFlight);
-            if (state.MoveToStation(null, landingEdges.Item1, landingFlight))
+            if (state.MoveToStation(null, landingEdges.StartStation, landingFlight))
             {
                 landingEdges = state.GetPathEdgeStations(landingFlight);
-                isValid = landingEdges == null;
+                isValid = landingEdges.StartStation == null;
             }
             else
             {
@@ -320,13 +322,13 @@ namespace BLL.Test
             // Test 4: no spot for departure proccess
             // Filling both departure starting points
             var depEdges = state.GetPathEdgeStations(departureFlight);
-            if (state.MoveToStation(null, depEdges.Item1, departureFlight))
+            if (state.MoveToStation(null, depEdges.StartStation, departureFlight))
             {
                 depEdges = state.GetPathEdgeStations(departureFlight);
-                if (state.MoveToStation(null, depEdges.Item1, departureFlight))
+                if (state.MoveToStation(null, depEdges.StartStation, departureFlight))
                 {
                     depEdges = state.GetPathEdgeStations(departureFlight);
-                    isValid = depEdges == null;
+                    isValid = depEdges.StartStation == null;
                 }
                 else
                 {
