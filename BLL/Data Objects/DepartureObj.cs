@@ -29,8 +29,8 @@ namespace BLL.Data_Objects
             Flight = new FlightModel(flightId, FlightType.Departure);
         }
 
-        // For DI - IServiceProvider as param to keep the DI graph connected.
-        public DepartureObj(IDepartureLogic depLogic, IStationsLogic stationsLogic, string flightId = "") : this(flightId)
+        // For DI
+        public DepartureObj(IDepartureLogic depLogic, IStationsLogic stationsLogic, string flightId) : this(flightId)
         {
             _depLogic = depLogic;
             _stationsLogic = stationsLogic;
@@ -49,27 +49,22 @@ namespace BLL.Data_Objects
 
         private async void OnTimerElapsed(object state)
         {
-            var id = Flight.Id.Substring(0, 7);
-            Debug.WriteLine($"Flight: {id}, Station: {StationsPath.CurrentStation.Number}");
             // Add try catch for StationNotFoundException and other exceptions.
             if (await _depLogic.FinishDapertureAsync(this))
             {
-                Debug.WriteLine($" ~~~ Flight {id} has finished landing proccess. ~~~");
                 _timer.Dispose();
                 return;
             }
 
             if (await _stationsLogic.MoveToNextStationAsync(this))
             {
-                Debug.WriteLine($"+++ Flight {id} has moved to station {StationsPath.CurrentStation.Number}. +++");
-                // Update the _periodTime to the station's StandbyTime.
+                // Update the _delayTime to the station's StandbyTime.
                 _delayTime = StationsPath.CurrentStation.StandbyPeriod;
                 _timer.Change(_delayTime, _delayTime);
             }
             else
             {
-                Debug.WriteLine($"--- Flight {id} was delayed. ---");
-                // Delay scedhualed take off time.
+                // Delay scheduled take off time.
                 Flight.DepartureTime += _delayTime;
             }
         }

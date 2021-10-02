@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Simulator", "Simulator\Simulator.csproj", "{B557B83D-88D4-4F71-9A5B-3977E27C1254}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLL.Test", "BLL.Test\BLL.Test.csproj", "{7C486BBE-81AA-405F-9B51-8C43A2ED3DD9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BLL.Test", "BLL.Test\BLL.Test.csproj", "{7C486BBE-81AA-405F-9B51-8C43A2ED3DD9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlTowerHub", "ControlTowerHub\ControlTowerHub.csproj", "{B992DA46-EDCD-4F17-96E3-6A929F40FB25}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{7C486BBE-81AA-405F-9B51-8C43A2ED3DD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C486BBE-81AA-405F-9B51-8C43A2ED3DD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C486BBE-81AA-405F-9B51-8C43A2ED3DD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B992DA46-EDCD-4F17-96E3-6A929F40FB25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B992DA46-EDCD-4F17-96E3-6A929F40FB25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B992DA46-EDCD-4F17-96E3-6A929F40FB25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B992DA46-EDCD-4F17-96E3-6A929F40FB25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

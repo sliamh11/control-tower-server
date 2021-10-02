@@ -42,12 +42,7 @@ namespace BLL.Logic
         public bool FinishDaperture(DepartureObj departureObj)
         {
             if (CanFinishDeparture(departureObj))
-            {
-                _stationsState.RemoveFlight(departureObj.StationsPath.CurrentStation);
-                // send _stationsState.StateUpdated();
-                // Update DB?
-                return true;
-            }
+                return _stationsState.RemoveFlight(departureObj.StationsPath.CurrentStation);
 
             return false;
         }

@@ -83,7 +83,10 @@ namespace BLL
             return _stationsState.AddStation(newStations);
         }
 
-        public IReadOnlyList<IReadOnlyDictionary<string,StationModel>> GetStationsState() => _stationsState.GetStationsState();
+        public IReadOnlyList<IReadOnlyDictionary<string, StationModel>> GetStationsState()
+        {
+            return _stationsState.GetStationsState();
+        }
 
         public async Task<bool> StartDepartureAsync(string flightId)
         {
@@ -100,7 +103,6 @@ namespace BLL
             var flight = new FlightModel(flightId, FlightType.Departure);
             _waitingFlightsList.AddLast(flight);
 
-            // SignalR notification to client side & DB
             return false;
         }
 
@@ -123,6 +125,9 @@ namespace BLL
             return false;
         }
 
-        public void AddToWaitingList(FlightModel flight) => _waitingFlightsList.AddLast(flight);
+        public void AddToWaitingList(FlightModel flight)
+        {
+            _waitingFlightsList.AddLast(flight);
+        }
     }
 }

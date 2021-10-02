@@ -1,31 +1,23 @@
 using BLL;
-using BLL.Interfaces;
-using BLL.Logic;
+using ControlTowerHub;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
 using Simulator;
 using Simulator.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Services
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -33,6 +25,7 @@ namespace Services
             services.AddControllers();
             services.AddLogicDependancies();
             services.AddSingleton<ISimulatorManager, SimulatorManager>();
+            services.AddSignalR();
             services.AddCors();
         }
 
@@ -50,6 +43,7 @@ namespace Services
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<TowerHub>("/tower-hub");
                 endpoints.MapControllers();
             });
         }

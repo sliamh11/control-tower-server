@@ -29,8 +29,8 @@ namespace BLL.Data_Objects
             Flight = new FlightModel(flightId, FlightType.Landing);
         }
 
-        // For DI - IServiceProvider as param to keep the DI graph connected.
-        public LandingObj(ILandingLogic landLogic, IStationsLogic stationsLogic, string flightId = "") : this(flightId)
+        // For DI
+        public LandingObj(ILandingLogic landLogic, IStationsLogic stationsLogic, string flightId) : this(flightId)
         {
             _landLogic = landLogic;
             _stationsLogic = stationsLogic;
@@ -50,27 +50,21 @@ namespace BLL.Data_Objects
         private async void OnTimerElapsed(object state)
         {
             // Add try catch for StationNotFoundException and other exceptions.
-            var id = Flight.Id.Substring(0, 7);
-            Debug.WriteLine($"Flight: {id}, Station: {StationsPath.CurrentStation.Number}");
-
             if (await _landLogic.FinishLandingAsync(this))
             {
-                Debug.WriteLine($" ~~~ Flight {id} has finished landing proccess. ~~~");
                 _timer.Dispose();
                 return;
             }
 
             if (await _stationsLogic.MoveToNextStationAsync(this))
             {
-                Debug.WriteLine($"+++ Flight {id} has moved to station {StationsPath.CurrentStation.Number}. +++");
-                // Update the _periodTime to the station's StandbyTime.
+                // Update the _delayTime to the station's StandbyTime.
                 _delayTime = StationsPath.CurrentStation.StandbyPeriod;
                 _timer.Change(_delayTime, _delayTime);
             }
             else
             {
-                Debug.WriteLine($"--- Flight {id} was delayed. ---");
-                // Delay scedhualed landing.
+                // Delay scheduled landing.
                 Flight.LandingTime += _delayTime;
             }
         }

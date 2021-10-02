@@ -157,7 +157,6 @@ namespace BLL.Test
             Assert.IsTrue(isValid);
 
             // Test 3: Search for a possible path between 2 stations (returns StationsModelPath)
-            //state = new StationsState();
             var stations = state.GetStationsState();
             stationA = stations[0].Values.FirstOrDefault();
             stationB = stations[5].Values.FirstOrDefault(); // Find out why index 7 wont work
@@ -238,10 +237,11 @@ namespace BLL.Test
             Assert.IsNotNull(edges.StartStation);
             Assert.IsNotNull(edges.EndStation);
 
-            // Test 2: When there's no room for a flight (returns null)
+            // Test 2: When there's no room for a flight (returns default)
             state.MoveToStation(null, edges.StartStation, landingFlight);
             edges = state.GetPathEdgeStations(landingFlight);
             Assert.IsNull(edges.StartStation);
+            Assert.IsNull(edges.EndStation);
 
             // Test 3: When DepartureFlight gets 2 points
             var departureFlight = new FlightModel("departure", FlightType.Departure);
@@ -255,6 +255,7 @@ namespace BLL.Test
             state.MoveToStation(null, edges.StartStation, departureFlight);
             edges = state.GetPathEdgeStations(departureFlight);
             Assert.IsNull(edges.StartStation);
+            Assert.IsNull(edges.EndStation);
         }
 
         [TestMethod]

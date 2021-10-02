@@ -3,6 +3,8 @@ using Common.Data_Structures;
 using Common.Enums;
 using Common.Models;
 using Common.Structs;
+using ControlTowerHub;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 
@@ -11,16 +13,25 @@ namespace BLL
     // Holds the Data Structure (is singleton).
     public class StationsState : IStationsState
     {
+        #region Private Fields
         private readonly StationsGraph _stations;
-        private readonly object _stationsLock = new object(); // For working with the data structure itself
-        private readonly object _stateLock = new object(); // For state updates, etc.
+        private readonly IHubContext<TowerHub, ITowerHub> _hubContext;
+        private readonly object _stationsLock = new object();
         private readonly object _getLandingLock = new object();
         private readonly object _getDepartureLock = new object();
+        #endregion
 
+        // For Unit Testing
         public StationsState()
         {
             _stations = new StationsGraph();
             LoadStations();
+        }
+
+        // For DI
+        public StationsState(IHubContext<TowerHub, ITowerHub> hubContext) : this()
+        {
+            _hubContext = hubContext;
         }
 
         private void LoadStations()
@@ -50,15 +61,15 @@ namespace BLL
             AddStation(new Dictionary<string, StationModel>() { { station.StationId, station } }); // Also has an exit
             station = new StationModel(3, new TimeSpan(0, 0, 35));
             AddStation(new Dictionary<string, StationModel>() { { station.StationId, station } }); // Station before runway.
+            StateUpdated();
         }
 
-        public void StateUpdated()
+        // If not working and needs to be Task instead of void - use SemaphoreSlim object (lock but for async tasks)
+        public async void StateUpdated()
         {
-            // Called each time something updated the _stations field.
             // Emits the updated state to all subscribers (client + DB).
-
-            // Maybe somehow update it in 'set' (property) if its even possible?
-            throw new NotImplementedException();
+            // Update DB too
+            await _hubContext?.Clients.All.StateUpdated(GetStationsState());
         }
 
         public IReadOnlyList<IReadOnlyDictionary<string, StationModel>> GetStationsState()
@@ -70,7 +81,14 @@ namespace BLL
         public bool AddStation(Dictionary<string, StationModel> newStations)
         {
             lock (_stationsLock)
-                return _stations.AddStation(newStations);
+            {
+                if (_stations.AddStation(newStations))
+                {
+                    StateUpdated();
+                    return true;
+                }
+                return false;
+            }
         }
 
         public bool IsStationEmpty(StationModel station)
@@ -94,7 +112,14 @@ namespace BLL
         public bool MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight)
         {
             lock (_stationsLock)
-                return _stations.MoveToStation(fromStation, toStation, flight);
+            {
+                if (_stations.MoveToStation(fromStation, toStation, flight))
+                {
+                    StateUpdated();
+                    return true;
+                }
+                return false;
+            }
         }
 
         public PathEdgesStruct GetPathEdgeStations(FlightModel flight)
@@ -112,7 +137,14 @@ namespace BLL
         public bool RemoveFlight(StationModel station)
         {
             lock (_stationsLock)
-                return _stations.RemoveFlight(station);
+            {
+                if (_stations.RemoveFlight(station))
+                {
+                    StateUpdated();
+                    return true;
+                }
+                return false;
+            }
         }
 
         public bool CanAddFlight(FlightType type)
@@ -132,7 +164,14 @@ namespace BLL
         public bool UpdateStation(StationModel updatedStation)
         {
             lock (_stationsLock)
-                return _stations.UpdateStation(updatedStation);
+            {
+                if (_stations.UpdateStation(updatedStation))
+                {
+                    StateUpdated();
+                    return true;
+                }
+                return false;
+            }
         }
     }
 }

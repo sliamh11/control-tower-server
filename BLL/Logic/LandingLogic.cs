@@ -5,13 +5,11 @@ using System.Threading.Tasks;
 
 namespace BLL.Logic
 {
-    // Instance created per request (scoped).
     public class LandingLogic : ILandingLogic
     {
         private IStationsState _stationsState;
         public LandingLogic(IStationsState stationsState)
         {
-            //_stationsState = StationsState.Instance;
             _stationsState = stationsState;
         }
 
@@ -29,8 +27,7 @@ namespace BLL.Logic
 
             landingObj.StationsPath = path;
             landingObj.Flight.LandingTime = DateTime.Now + landingObj.StationsPath.OverallTime;
-            _stationsState.MoveToStation(null, pathEdges.StartStation, landingObj.Flight);
-            return true;
+            return _stationsState.MoveToStation(null, pathEdges.StartStation, landingObj.Flight);
         }
         public async Task<bool> StartLandingAsync(LandingObj landingObj)
         {
@@ -44,12 +41,7 @@ namespace BLL.Logic
         public bool FinishLanding(LandingObj landingObj)
         {
             if (CanFinishLanding(landingObj))
-            {
-                _stationsState.RemoveFlight(landingObj.StationsPath.CurrentStation);
-                // send _stationsState.StateUpdated();
-                // Update DB?
-                return true;
-            }
+                return _stationsState.RemoveFlight(landingObj.StationsPath.CurrentStation);
 
             return false;
         }
