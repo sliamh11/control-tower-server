@@ -2,10 +2,8 @@
 using Common.Enums;
 using Common.Models;
 using System;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BLL.Data_Objects
 {
@@ -30,7 +28,7 @@ namespace BLL.Data_Objects
         }
 
         // For DI
-        public LandingObj(ILandingLogic landLogic, IStationsLogic stationsLogic, string flightId) : this(flightId)
+        public LandingObj(ILandingLogic landLogic, IStationsLogic stationsLogic, string flightId = "") : this(flightId)
         {
             _landLogic = landLogic;
             _stationsLogic = stationsLogic;
@@ -53,7 +51,7 @@ namespace BLL.Data_Objects
             if (await _landLogic.FinishLandingAsync(this))
             {
                 _timer.Dispose();
-                return;
+                return; // Check if works without
             }
 
             if (await _stationsLogic.MoveToNextStationAsync(this))

@@ -25,13 +25,13 @@ namespace BLL
         public StationsState()
         {
             _stations = new StationsGraph();
-            LoadStations();
         }
 
         // For DI
         public StationsState(IHubContext<TowerHub, ITowerHub> hubContext) : this()
         {
             _hubContext = hubContext;
+            LoadStations();
         }
 
         private void LoadStations()
@@ -74,8 +74,7 @@ namespace BLL
 
         public IReadOnlyList<IReadOnlyDictionary<string, StationModel>> GetStationsState()
         {
-            lock (_stationsLock)
-                return _stations.GetStationsState();
+            return _stations.GetStationsState();
         }
 
         public bool AddStation(Dictionary<string, StationModel> newStations)

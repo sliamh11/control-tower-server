@@ -16,10 +16,10 @@ namespace Common.Data_Structures
         // 2. Easy to control a list's size (mostly O(1), when needed to expend - O(n)).
 
         private readonly List<Dictionary<string, StationModel>> _stations;
-        private LinkedList<StationModel> _startLandingStations;
-        private LinkedList<StationModel> _startDepartureStations;
-        private LinkedList<StationModel> _endLandingStations;
-        private LinkedList<StationModel> _endDepartureStations;
+        private readonly LinkedList<StationModel> _startLandingStations;
+        private readonly LinkedList<StationModel> _startDepartureStations;
+        private readonly LinkedList<StationModel> _endLandingStations;
+        private readonly LinkedList<StationModel> _endDepartureStations;
 
         public StationsGraph()
         {

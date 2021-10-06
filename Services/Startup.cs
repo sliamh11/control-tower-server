@@ -26,7 +26,16 @@ namespace Services
             services.AddLogicDependancies();
             services.AddSingleton<ISimulatorManager, SimulatorManager>();
             services.AddSignalR();
-            services.AddCors();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("ClientPermission", policy =>
+                {
+                    policy.AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowAnyOrigin()
+                    .AllowCredentials();
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,10 +49,11 @@ namespace Services
             app.UseRouting();
 
             app.UseAuthorization();
+            app.UseCors("ClientPermission");
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHub<TowerHub>("/tower-hub");
+                endpoints.MapHub<TowerHub>("/api/tower-hub");
                 endpoints.MapControllers();
             });
         }

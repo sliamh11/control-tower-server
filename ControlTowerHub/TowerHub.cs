@@ -12,6 +12,5 @@ namespace ControlTowerHub
         {
             await Clients.All.StateUpdated(stationsState);
         }
-
     }
 }

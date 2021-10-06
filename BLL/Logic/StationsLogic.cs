@@ -30,6 +30,7 @@ namespace BLL.Logic
             return _stationsState.IsStationEmpty(nextStation);
         }
 
+        // Make shorter
         public bool MoveToNextStation(IDataObj dataObj)
         {
             var currStation = dataObj.StationsPath.CurrentStation;
@@ -42,8 +43,6 @@ namespace BLL.Logic
                     {
                         dataObj.StationsPath.Path.RemoveFirst(); // Remove old station
                         dataObj.StationsPath.CurrentStation = nextStation; // Update the current station.
-                        // Call the StateUpdated() func.
-                        // Update DB?
                         return true;
                     }
                 }

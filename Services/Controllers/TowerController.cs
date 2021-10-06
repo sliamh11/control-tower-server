@@ -22,6 +22,12 @@ namespace Services.Controllers
         [Route("")]
         public IActionResult Index() => Ok("In tower controller");
 
+        [HttpGet("state")]
+        public JsonResult GetState()
+        {
+            return Json(_manager.GetStationsState());
+        }
+
         [HttpPost("start-departure")]
         public async Task<IActionResult> StartDeparture([FromBody] string flightId)
         {

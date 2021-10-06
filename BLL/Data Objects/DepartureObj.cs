@@ -30,7 +30,7 @@ namespace BLL.Data_Objects
         }
 
         // For DI
-        public DepartureObj(IDepartureLogic depLogic, IStationsLogic stationsLogic, string flightId) : this(flightId)
+        public DepartureObj(IDepartureLogic depLogic, IStationsLogic stationsLogic, string flightId = "") : this(flightId)
         {
             _depLogic = depLogic;
             _stationsLogic = stationsLogic;
