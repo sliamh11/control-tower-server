@@ -33,13 +33,13 @@ namespace BLL.Test
 
             // Test 2: A dictionary with an invalid station
             var station = new StationModel(-5, new TimeSpan(0, 0, 30), StationType.Normal);
-            newStations.Add(station.StationId, station);
+            newStations.Add(station.Id, station);
             result = state.AddStation(newStations);
             Assert.IsFalse(result);
 
             // Test 3: A dictionary with valid & invalid stations
             station = new StationModel(2, new TimeSpan(0, 0, 30));
-            newStations.Add(station.StationId, station);
+            newStations.Add(station.Id, station);
             result = state.AddStation(newStations);
             Assert.IsFalse(result);
 
@@ -48,8 +48,8 @@ namespace BLL.Test
             var stationB = new StationModel(2, new TimeSpan(0, 0, 30), StationType.Landing);
             newStations = new Dictionary<string, StationModel>()
             {
-                { stationA.StationId, stationA},
-                {stationB.StationId,stationB }
+                { stationA.Id, stationA},
+                {stationB.Id,stationB }
             };
             result = state.AddStation(newStations);
             Assert.IsTrue(result);

@@ -38,29 +38,29 @@ namespace BLL
         {
             // Normal stations
             var station = new StationModel(1, new TimeSpan(0, 1, 0), StationType.Landing);
-            AddStation(new Dictionary<string, StationModel>() { { station.StationId, station } });
+            AddStation(new Dictionary<string, StationModel>() { { station.Id, station } });
             station = new StationModel(2, new TimeSpan(0, 0, 45));
-            AddStation(new Dictionary<string, StationModel>() { { station.StationId, station } });
+            AddStation(new Dictionary<string, StationModel>() { { station.Id, station } });
             station = new StationModel(3, new TimeSpan(0, 0, 40));
-            AddStation(new Dictionary<string, StationModel>() { { station.StationId, station } });
+            AddStation(new Dictionary<string, StationModel>() { { station.Id, station } });
 
             // Runway
             station = new StationModel(4, new TimeSpan(0, 1, 30), StationType.Runway);
-            AddStation(new Dictionary<string, StationModel>() { { station.StationId, station } });
+            AddStation(new Dictionary<string, StationModel>() { { station.Id, station } });
 
             // Airport & Depratures
             station = new StationModel(5, new TimeSpan(0, 0, 45));
             var stationB = new StationModel(6, new TimeSpan(0, 0, 45));
             AddStation(new Dictionary<string, StationModel>() {
-                { station.StationId, station },
-                {stationB.StationId, stationB }
+                { station.Id, station },
+                {stationB.Id, stationB }
             });
             station = new StationModel(7, new TimeSpan(0, 1, 0), StationType.LandingExit, StationType.Departure);
-            AddStation(new Dictionary<string, StationModel>() { { station.StationId, station } }); // Also has an exit
+            AddStation(new Dictionary<string, StationModel>() { { station.Id, station } }); // Also has an exit
             station = new StationModel(7, new TimeSpan(0, 1, 0), StationType.LandingExit, StationType.Departure);
-            AddStation(new Dictionary<string, StationModel>() { { station.StationId, station } }); // Also has an exit
+            AddStation(new Dictionary<string, StationModel>() { { station.Id, station } }); // Also has an exit
             station = new StationModel(3, new TimeSpan(0, 0, 35));
-            AddStation(new Dictionary<string, StationModel>() { { station.StationId, station } }); // Station before runway.
+            AddStation(new Dictionary<string, StationModel>() { { station.Id, station } }); // Station before runway.
             StateUpdated();
         }
 

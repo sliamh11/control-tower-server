@@ -56,7 +56,7 @@ namespace Common.Data_Structures
             {
                 // Add to existing station
                 foreach (var item in station.Values)
-                    _stations[stationNum].TryAdd(item.StationId, item); // Will not add a duplicated station
+                    _stations[stationNum].TryAdd(item.Id, item); // Will not add a duplicated station
             }
 
             // Add the relevant stations to the relevant lists
@@ -89,7 +89,7 @@ namespace Common.Data_Structures
         // O(1)
         public bool RemoveFlight(StationModel station)
         {
-            if (_stations[station.Number].TryGetValue(station.StationId, out station))
+            if (_stations[station.Number].TryGetValue(station.Id, out station))
             {
                 station.CurrentFlight = null;
                 return true;
@@ -135,9 +135,9 @@ namespace Common.Data_Structures
         // O(1)
         public bool UpdateStation(StationModel updatedStation)
         {
-            if (_stations[updatedStation.Number].TryGetValue(updatedStation.StationId, out StationModel existingStation))
+            if (_stations[updatedStation.Number].TryGetValue(updatedStation.Id, out StationModel existingStation))
             {
-                _stations[existingStation.Number][existingStation.StationId] = updatedStation;
+                _stations[existingStation.Number][existingStation.Id] = updatedStation;
                 return true;
             }
             return false;
@@ -173,8 +173,8 @@ namespace Common.Data_Structures
                || targetIndex < 0 || targetIndex >= _stations.Count)
                 throw new ArgumentException("One of the stations isn't valid.");
 
-            if (!_stations[startIndex].TryGetValue(startStation.StationId, out StationModel stationA)
-                || !_stations[targetIndex].TryGetValue(targetStation.StationId, out StationModel stationB))
+            if (!_stations[startIndex].TryGetValue(startStation.Id, out StationModel stationA)
+                || !_stations[targetIndex].TryGetValue(targetStation.Id, out StationModel stationB))
                 throw new StationNotFoundException();
 
             StationsTable[] table = new StationsTable[_stations.Count];
@@ -269,7 +269,7 @@ namespace Common.Data_Structures
                 || (fromStation != null && (fromStation.Number < 0 || fromStation.Number >= _stations.Count)))
                 throw new ArgumentException();
 
-            var targetStation = _stations[toStation.Number].GetValueOrDefault(toStation.StationId);
+            var targetStation = _stations[toStation.Number].GetValueOrDefault(toStation.Id);
             if (targetStation == null)
                 throw new StationNotFoundException();
 
@@ -285,7 +285,7 @@ namespace Common.Data_Structures
                 return false;
             }
 
-            var startStation = _stations[fromStation.Number].GetValueOrDefault(fromStation.StationId);
+            var startStation = _stations[fromStation.Number].GetValueOrDefault(fromStation.Id);
             if (startStation == null)
                 throw new StationNotFoundException();
 
@@ -342,7 +342,7 @@ namespace Common.Data_Structures
             if (station.Number < 0 || station.Number >= _stations.Count)
                 throw new ArgumentException();
 
-            var currStation = _stations[station.Number].GetValueOrDefault(station.StationId);
+            var currStation = _stations[station.Number].GetValueOrDefault(station.Id);
             if (currStation == null)
                 throw new StationNotFoundException();
 

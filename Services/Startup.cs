@@ -30,9 +30,9 @@ namespace Services
             {
                 options.AddPolicy("ClientPermission", policy =>
                 {
-                    policy.AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowAnyOrigin()
+                    policy.AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .WithOrigins("http://localhost:3000")
                     .AllowCredentials();
                 });
             });

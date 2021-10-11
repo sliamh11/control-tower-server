@@ -18,6 +18,9 @@ namespace BLL.Logic
             _stationsState = stationsState;
         }
 
+        // TODO: Add 'DependencyStationsList' to the relevant StationModel
+        // - stations which must be empty so the flight can go to the station 
+        // (In order to prevent the stuck flights loop scenario)
         private bool CanMoveToNextStation(IDataObj dataObj)
         {
             var nextStation = dataObj.StationsPath.Path.First.Next?.Value;
@@ -46,7 +49,7 @@ namespace BLL.Logic
                         return true;
                     }
                 }
-                    return false;
+                return false;
             }
             catch (Exception ex) // Needs to be StationNotAvailableException
             {

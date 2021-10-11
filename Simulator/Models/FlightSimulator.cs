@@ -38,7 +38,7 @@ namespace Simulator
             var flightId = Guid.NewGuid().ToString();
             var flightIdJson = JsonConvert.SerializeObject(flightId);
             var body = new StringContent(flightIdJson, Encoding.UTF8, "application/json");
-            await _client.PostAsync(_url, body); // No need for the response
+            await _client.PostAsync(_url, body);
             Interval = _rand.Next(_minTime, _maxTime) * 1000;
             _timer.Interval = Interval;
         }
