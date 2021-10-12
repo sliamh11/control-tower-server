@@ -17,6 +17,7 @@ namespace BLL.Interfaces
         StationsPathModel FindFastestPath(StationModel currStation, StationModel targetStation);
         bool MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight);
         PathEdgesStruct GetPathEdgeStations(FlightModel flight);
+        StationModel GetExitStation(FlightType type);
         bool RemoveFlight(StationModel station);
         bool CanAddFlight(FlightType type);
         bool UpdateStation(StationModel updatedStation);

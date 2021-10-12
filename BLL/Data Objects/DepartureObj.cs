@@ -4,8 +4,6 @@ using Common.Models;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics;
 
 namespace BLL.Data_Objects
 {
@@ -49,23 +47,30 @@ namespace BLL.Data_Objects
 
         private async void OnTimerElapsed(object state)
         {
-            // Add try catch for StationNotFoundException and other exceptions.
-            if (await _depLogic.FinishDapertureAsync(this))
+            try
             {
-                _timer.Dispose();
-                return;
-            }
+                if (await _depLogic.FinishDapertureAsync(this))
+                {
+                    _timer.Dispose();
+                    return;
+                }
 
-            if (await _stationsLogic.MoveToNextStationAsync(this))
-            {
-                // Update the _delayTime to the station's StandbyTime.
-                _delayTime = StationsPath.CurrentStation.StandbyPeriod;
-                _timer.Change(_delayTime, _delayTime);
+                if (await _stationsLogic.MoveToNextStationAsync(this))
+                {
+                    // Update the _delayTime to the station's StandbyTime.
+                    _delayTime = StationsPath.CurrentStation.StandbyPeriod;
+                    _timer.Change(_delayTime, _delayTime);
+                }
+                else
+                {
+                    // Delay scheduled take off time.
+                    Flight.DepartureTime += _delayTime;
+                    Flight.LandingTime += _delayTime;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // Delay scheduled take off time.
-                Flight.DepartureTime += _delayTime;
+                // Log exception
             }
         }
     }

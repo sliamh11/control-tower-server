@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace BLL.Logic
 {
-    // Instance created per request (scoped).
     public class DepartureLogic : IDepartureLogic
     {
         private IStationsState _stationsState;
@@ -14,42 +13,68 @@ namespace BLL.Logic
             _stationsState = state;
         }
 
+        #region Public Functions
         public bool StartDeparture(DepartureObj departureObj)
         {
-            // 'Fastest' start & end points (by StandbyPeriod)
-            var pathEdges = _stationsState.GetPathEdgeStations(departureObj.Flight);
-            if (pathEdges.StartStation == null || pathEdges.EndStation == null)
-                return false;
+            try
+            {
+                // 'Fastest' start & end points (by StandbyPeriod)
+                var pathEdges = _stationsState.GetPathEdgeStations(departureObj.Flight);
+                if (pathEdges.StartStation == null || pathEdges.EndStation == null)
+                    return false;
 
-            // Fastest path between the points
-            var path = _stationsState.FindFastestPath(pathEdges.StartStation, pathEdges.EndStation);
-            if (path == null)
-                return false;
+                // Fastest path between the points
+                var path = _stationsState.FindFastestPath(pathEdges.StartStation, pathEdges.EndStation);
+                if (path == null)
+                    return false;
 
-            departureObj.StationsPath = path;
-            departureObj.Flight.DepartureTime = DateTime.Now + departureObj.StationsPath.OverallTime;
-            return _stationsState.MoveToStation(null, pathEdges.StartStation, departureObj.Flight);
+                departureObj.StationsPath = path;
+                SetFlightTimeSpans(departureObj);
+                return _stationsState.MoveToStation(null, pathEdges.StartStation, departureObj.Flight);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
         public async Task<bool> StartDepartureAsync(DepartureObj departureObj)
         {
             return await Task.Run(() => StartDeparture(departureObj));
         }
-
-        private bool CanFinishDeparture(DepartureObj departureObj)
-        {
-            return departureObj.StationsPath.CurrentStation == departureObj.StationsPath.Path.Last.Value;
-        }
         public bool FinishDaperture(DepartureObj departureObj)
         {
-            if (CanFinishDeparture(departureObj))
-                return _stationsState.RemoveFlight(departureObj.StationsPath.CurrentStation);
+            try
+            {
+                if (CanFinishDeparture(departureObj))
+                    return _stationsState.RemoveFlight(departureObj.StationsPath.CurrentStation);
 
-            return false;
+                return false;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
         public async Task<bool> FinishDapertureAsync(DepartureObj departureObj)
         {
             return await Task.Run(() => FinishDaperture(departureObj));
         }
+        #endregion
 
+        #region Helper Functions
+        private void SetFlightTimeSpans(DepartureObj departureObj)
+        {
+            var rand = new Random();
+            var hours = rand.Next(0, 6);
+            var minutes = rand.Next(1, 61);
+            var seconds = rand.Next(1, 61);
+            departureObj.Flight.DepartureTime = DateTime.Now + departureObj.StationsPath.OverallTime;
+            departureObj.Flight.LandingTime = departureObj.Flight.DepartureTime + new TimeSpan(hours, minutes, seconds);
+        }
+        private bool CanFinishDeparture(DepartureObj departureObj)
+        {
+            return departureObj.StationsPath.CurrentStation == departureObj.StationsPath.Path.Last.Value;
+        }
+        #endregion
     }
 }

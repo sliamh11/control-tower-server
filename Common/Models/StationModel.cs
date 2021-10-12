@@ -3,18 +3,24 @@ using System;
 
 namespace Common.Models
 {
-    public class StationModel : IComparable<StationModel>
+    public class StationModel
     {
-        //[Key]
+        //[Key]//return  _datacontext.Stationsmodel.Include(s => s.CurrentFlight)
         public string Id { get; private set; } // Competible with EF -> some say internal and not private, check
         public int Number { get; set; }
         public int NextStation { get; set; }
+        
         public FlightModel CurrentFlight { get; set; }
         public StationType[] Types { get; set; }
         public StationStatuses Status { get; set; }
         public TimeSpan StandbyPeriod { get; set; }
 
-        public StationModel(int nextStation, TimeSpan standBy, params StationType[] types)
+        public StationModel()
+        {
+
+        }
+
+        public StationModel(int nextStation, TimeSpan standBy, params StationType[] types) : this()
         {
             Id = Guid.NewGuid().ToString();
             Number = -1; // Default value.
@@ -35,12 +41,6 @@ namespace Common.Models
         public StationModel(int existingStation, int nextStation, TimeSpan standBy, params StationType[] types) : this(nextStation, standBy, types)
         {
             Number = existingStation;
-        }
-
-        public int CompareTo(StationModel other)
-        {
-            // Compare station's 'value' by StandbyPeriod
-            return StandbyPeriod.CompareTo(other.StandbyPeriod);
         }
     }
 }

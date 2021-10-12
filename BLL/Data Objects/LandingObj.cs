@@ -47,23 +47,30 @@ namespace BLL.Data_Objects
 
         private async void OnTimerElapsed(object state)
         {
-            // Add try catch for StationNotFoundException and other exceptions.
-            if (await _landLogic.FinishLandingAsync(this))
+            try
             {
-                _timer.Dispose();
-                return; // Check if works without
-            }
+                // Add try catch for StationNotFoundException and other exceptions.
+                if (await _landLogic.FinishLandingAsync(this))
+                {
+                    _timer.Dispose();
+                    return;
+                }
 
-            if (await _stationsLogic.MoveToNextStationAsync(this))
-            {
-                // Update the _delayTime to the station's StandbyTime.
-                _delayTime = StationsPath.CurrentStation.StandbyPeriod;
-                _timer.Change(_delayTime, _delayTime);
+                if (await _stationsLogic.MoveToNextStationAsync(this))
+                {
+                    // Update the _delayTime to the station's StandbyTime.
+                    _delayTime = StationsPath.CurrentStation.StandbyPeriod;
+                    _timer.Change(_delayTime, _delayTime);
+                }
+                else
+                {
+                    // Delay scheduled landing.
+                    Flight.LandingTime += _delayTime;
+                }
             }
-            else
+            catch (Exception)
             {
-                // Delay scheduled landing.
-                Flight.LandingTime += _delayTime;
+                // log
             }
         }
     }

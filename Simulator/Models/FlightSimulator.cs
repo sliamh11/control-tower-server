@@ -23,11 +23,11 @@ namespace Simulator
         public FlightSimulator(string url)
         {
             _url = url;
-            _minTime = 10;
-            _maxTime = 60;
+            _minTime = 5;
+            _maxTime = 10;
             _client = new HttpClient();
             _rand = new Random();
-            Interval = _rand.Next(_minTime, _maxTime) * 1000;
+            Interval = _rand.Next(_minTime, _maxTime) * 1000; // Every 5-10 seconds
             _timer = new Timer(Interval);
             _timer.Elapsed += (s, e) => OnTimerElapsed();
             _timer.Start();

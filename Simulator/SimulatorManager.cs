@@ -2,6 +2,9 @@
 
 namespace Simulator
 {
+    /// <summary>
+    /// This class is managing the project's simulator - it sends new flights every 5-10 seconds, through an API request.
+    /// </summary>
     public class SimulatorManager : ISimulatorManager
     {
         private static FlightSimulator _landingSimulator;

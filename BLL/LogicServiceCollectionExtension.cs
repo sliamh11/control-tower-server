@@ -3,7 +3,6 @@ using BLL.Interfaces;
 using BLL.Logic;
 using Microsoft.Extensions.DependencyInjection;
 
-
 namespace BLL
 {
     public static class LogicServiceCollectionExtension
@@ -22,7 +21,6 @@ namespace BLL
             services.AddTransient<IStationsLogic, StationsLogic>();
             services.AddTransient<ILandingLogic, LandingLogic>();
             services.AddTransient<IDepartureLogic, DepartureLogic>();
-
             return services;
         }
     }

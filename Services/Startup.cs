@@ -47,7 +47,6 @@ namespace Services
             }
 
             app.UseRouting();
-
             app.UseAuthorization();
             app.UseCors("ClientPermission");
 

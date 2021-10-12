@@ -10,7 +10,10 @@ using System.Collections.Generic;
 
 namespace BLL
 {
-    // Holds the Data Structure (is singleton).
+    /// <summary>
+    /// This class is in charge of managing the program's current state.
+    /// It holds the graph structure and updates the DB & Client (with the hub).
+    /// </summary>
     public class StationsState : IStationsState
     {
         #region Private Fields
@@ -34,6 +37,121 @@ namespace BLL
             LoadStations();
         }
 
+        #region State Functions
+        public async void StateUpdated()
+        {
+            // Emits the updated state to all subscribers (client + DB).
+            // TODO: Update DB too
+            await _hubContext?.Clients.All.StateUpdated(GetStationsState());
+        }
+        #endregion
+
+        #region Public Functions
+        public IReadOnlyList<IReadOnlyDictionary<string, StationModel>> GetStationsState()
+        {
+            return _stations.GetStationsState();
+        }
+        public bool AddStation(Dictionary<string, StationModel> newStations)
+        {
+            lock (_stationsLock)
+            {
+                if (_stations.AddStation(newStations))
+                {
+                    StateUpdated();
+                    return true;
+                }
+                return false;
+            }
+        }
+        public bool IsStationEmpty(StationModel station)
+        {
+            lock (_stationsLock)
+                return _stations.IsStationEmpty(station);
+        }
+        public StationsPathModel FindFastestPath(int startIndex, int targetIndex)
+        {
+            lock (_stationsLock)
+                return _stations.FindFastestPath(startIndex, targetIndex);
+        }
+        public StationsPathModel FindFastestPath(StationModel currStation, StationModel targetStation)
+        {
+            lock (_stationsLock)
+                return _stations.FindFastestPath(currStation, targetStation);
+        }
+        public bool MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight)
+        {
+            lock (_stationsLock)
+            {
+                if (_stations.MoveToStation(fromStation, toStation, flight))
+                {
+                    StateUpdated();
+                    return true;
+                }
+                return false;
+            }
+        }
+        public PathEdgesStruct GetPathEdgeStations(FlightModel flight)
+        {
+            if (flight.Type == FlightType.Landing)
+            {
+                lock (_getLandingLock)
+                    return _stations.GetLandingEdgeStations();
+            }
+
+            lock (_getDepartureLock)
+                return _stations.GetDepartureEdgeStations();
+        }
+        public bool RemoveFlight(StationModel station)
+        {
+            lock (_stationsLock)
+            {
+                if (_stations.RemoveFlight(station))
+                {
+                    StateUpdated();
+                    return true;
+                }
+                return false;
+            }
+        }
+        public bool CanAddFlight(FlightType type)
+        {
+            if (type == FlightType.Departure)
+            {
+                lock (_getDepartureLock)
+                    return _stations.CanAddFlight(type);
+            }
+            else
+            {
+                lock (_getLandingLock)
+                    return _stations.CanAddFlight(type);
+            }
+        }
+        public bool UpdateStation(StationModel updatedStation)
+        {
+            lock (_stationsLock)
+            {
+                if (_stations.UpdateStation(updatedStation))
+                {
+                    StateUpdated();
+                    return true;
+                }
+                return false;
+            }
+        }
+        public StationModel GetExitStation(FlightType type)
+        {
+            if (type == FlightType.Departure)
+            {
+                lock (_getDepartureLock)
+                    return _stations.GetExitStation(type);
+            }
+
+            lock (_getLandingLock)
+                return _stations.GetExitStation(type);
+        }
+        #endregion
+        
+        #region Private Functions
         private void LoadStations()
         {
             // Normal stations
@@ -45,7 +163,7 @@ namespace BLL
             AddStation(new Dictionary<string, StationModel>() { { station.Id, station } });
 
             // Runway
-            station = new StationModel(4, new TimeSpan(0, 1, 30), StationType.Runway);
+            station = new StationModel(4, new TimeSpan(0, 0, 45), StationType.Runway);
             AddStation(new Dictionary<string, StationModel>() { { station.Id, station } });
 
             // Airport & Depratures
@@ -63,114 +181,6 @@ namespace BLL
             AddStation(new Dictionary<string, StationModel>() { { station.Id, station } }); // Station before runway.
             StateUpdated();
         }
-
-        // If not working and needs to be Task instead of void - use SemaphoreSlim object (lock but for async tasks)
-        public async void StateUpdated()
-        {
-            // Emits the updated state to all subscribers (client + DB).
-            // Update DB too
-            await _hubContext?.Clients.All.StateUpdated(GetStationsState());
-        }
-
-        public IReadOnlyList<IReadOnlyDictionary<string, StationModel>> GetStationsState()
-        {
-            return _stations.GetStationsState();
-        }
-
-        public bool AddStation(Dictionary<string, StationModel> newStations)
-        {
-            lock (_stationsLock)
-            {
-                if (_stations.AddStation(newStations))
-                {
-                    StateUpdated();
-                    return true;
-                }
-                return false;
-            }
-        }
-
-        public bool IsStationEmpty(StationModel station)
-        {
-            lock (_stationsLock)
-                return _stations.IsStationEmpty(station);
-        }
-
-        public StationsPathModel FindFastestPath(int startIndex, int targetIndex)
-        {
-            lock (_stationsLock)
-                return _stations.FindFastestPath(startIndex, targetIndex);
-        }
-
-        public StationsPathModel FindFastestPath(StationModel currStation, StationModel targetStation)
-        {
-            lock (_stationsLock)
-                return _stations.FindFastestPath(currStation, targetStation);
-        }
-
-        public bool MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight)
-        {
-            lock (_stationsLock)
-            {
-                if (_stations.MoveToStation(fromStation, toStation, flight))
-                {
-                    StateUpdated();
-                    return true;
-                }
-                return false;
-            }
-        }
-
-        public PathEdgesStruct GetPathEdgeStations(FlightModel flight)
-        {
-            if (flight.Type == FlightType.Landing)
-            {
-                lock (_getLandingLock)
-                    return _stations.GetLandingEdgeStations();
-            }
-
-            lock (_getDepartureLock)
-                return _stations.GetDepartureEdgeStations();
-        }
-
-        public bool RemoveFlight(StationModel station)
-        {
-            lock (_stationsLock)
-            {
-                if (_stations.RemoveFlight(station))
-                {
-                    StateUpdated();
-                    return true;
-                }
-                return false;
-            }
-        }
-
-        public bool CanAddFlight(FlightType type)
-        {
-            if (type == FlightType.Departure)
-            {
-                lock (_getDepartureLock)
-                    return _stations.CanAddFlight(type);
-            }
-            else
-            {
-                lock (_getLandingLock)
-                    return _stations.CanAddFlight(type);
-            }
-        }
-
-        public bool UpdateStation(StationModel updatedStation)
-        {
-            lock (_stationsLock)
-            {
-                if (_stations.UpdateStation(updatedStation))
-                {
-                    StateUpdated();
-                    return true;
-                }
-                return false;
-            }
-        }
+        #endregion
     }
 }

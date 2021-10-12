@@ -10,12 +10,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BLL
 {
+    /// <summary>
+    /// This class manages the incoming API requests from the Services layer.
+    /// </summary>
     public class TowerManager : ITowerManager
     {
+        #region Private Fields
         private IStationsState _stationsState;
         private IServiceProvider _provider;
         private LinkedList<FlightModel> _waitingFlightsList;
         private Timer _queueTimer;
+        #endregion
 
         public TowerManager(IServiceProvider provider, IStationsState stationsState)
         {
@@ -25,61 +30,36 @@ namespace BLL
 
             // Init timer
             _waitingFlightsList = new LinkedList<FlightModel>();
-            _queueTimer = new Timer(30000); // 30 Seconds
+            _queueTimer = new Timer(15000); // 15 seconds.
             _queueTimer.Elapsed += (s, e) => OnTimerElapsed();
             _queueTimer.Start();
         }
 
+        #region Timer Handler
         private async void OnTimerElapsed()
         {
-            // Reset canLand & canDeparture's status
-            bool canLand = true;
-            bool canDeparture = true;
-            if (_waitingFlightsList.Count > 0)
+            try
             {
-                LinkedList<FlightModel> removalList = new LinkedList<FlightModel>();
-                foreach (var flight in _waitingFlightsList)
+                if (_waitingFlightsList.Count > 0)
                 {
-                    bool isLanding = flight.Type == FlightType.Landing;
-                    // Check if flight is relevant at all.
-                    if (isLanding && !canLand)
-                        continue;
-
-                    if (!isLanding && !canDeparture)
-                        continue;
-
-                    if (_stationsState.CanAddFlight(flight.Type))
-                    {
-                        if (isLanding)
-                            await StartLandingAsync(flight.Id);
-                        else
-                            await StartDepartureAsync(flight.Id);
-
-                        removalList.AddLast(flight);
-                    }
-                    else
-                    {
-                        if (isLanding)
-                            canLand = false;
-                        else
-                            canDeparture = false;
-                    }
-
-                    // If no available spots at all - exit current timer's interval.
-                    if (!canLand && !canDeparture)
-                        break;
+                    var removalList = await GetRemovableFlights();
+                    foreach (var flight in removalList)
+                        _waitingFlightsList.Remove(flight);
                 }
-
-                foreach (var flight in removalList)
-                    _waitingFlightsList.Remove(flight);
+            }
+            catch (Exception)
+            {
+                // log exception
             }
         }
+        #endregion
 
-        public bool AddStation(Dictionary<string,StationModel> newStations)
+        #region Public Functions
+        public bool AddStation(Dictionary<string, StationModel> newStations)
         {
             if (newStations == null || newStations.Count == 0)
                 throw new ArgumentException("New station is not valid.");
-            
+
             return _stationsState.AddStation(newStations);
         }
 
@@ -100,9 +80,7 @@ namespace BLL
                     return true;
             }
 
-            var flight = new FlightModel(flightId, FlightType.Departure);
-            _waitingFlightsList.AddLast(flight);
-
+            AddToWaitingList(new FlightModel(flightId, FlightType.Departure));
             return false;
         }
 
@@ -118,10 +96,7 @@ namespace BLL
                     return true;
             }
 
-            var flight = new FlightModel(flightId, FlightType.Landing);
-            _waitingFlightsList.AddLast(flight);
-
-            // SignalR notification to client side & DB
+            AddToWaitingList(new FlightModel(flightId, FlightType.Landing));
             return false;
         }
 
@@ -129,5 +104,47 @@ namespace BLL
         {
             _waitingFlightsList.AddLast(flight);
         }
+        #endregion
+
+        #region Private Functions
+        private async Task<LinkedList<FlightModel>> GetRemovableFlights()
+        {
+            bool canLand = true;
+            bool canDeparture = true;
+            var removableList = new LinkedList<FlightModel>();
+            foreach (var flight in _waitingFlightsList)
+            {
+                bool isLanding = flight.Type == FlightType.Landing;
+                // Check if flight is relevant at all.
+                if (isLanding && !canLand)
+                    continue;
+
+                if (!isLanding && !canDeparture)
+                    continue;
+
+                if (_stationsState.CanAddFlight(flight.Type))
+                {
+                    if (isLanding)
+                        await StartLandingAsync(flight.Id);
+                    else
+                        await StartDepartureAsync(flight.Id);
+
+                    removableList.AddLast(flight);
+                }
+                else
+                {
+                    if (isLanding)
+                        canLand = false;
+                    else
+                        canDeparture = false;
+                }
+
+                // If no available spots at all - exit current timer's interval.
+                if (!canLand && !canDeparture)
+                    break;
+            }
+            return removableList;
+        }
+        #endregion
     }
 }
