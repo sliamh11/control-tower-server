@@ -28,13 +28,13 @@ namespace BLL
         public StationsState()
         {
             _stations = new StationsGraph();
+            LoadStations();
         }
 
         // For DI
         public StationsState(IHubContext<TowerHub, ITowerHub> hubContext) : this()
         {
             _hubContext = hubContext;
-            LoadStations();
         }
 
         #region State Functions
@@ -42,7 +42,7 @@ namespace BLL
         {
             // Emits the updated state to all subscribers (client + DB).
             // TODO: Update DB too
-            await _hubContext?.Clients.All.StateUpdated(GetStationsState());
+            await _hubContext?.Clients?.All?.StateUpdated(GetStationsState());
         }
         #endregion
 

@@ -66,7 +66,8 @@ namespace Common.Data_Structures
         // O(1)
         public bool RemoveFlight(StationModel station)
         {
-            if (_stations[station.Number].TryGetValue(station.Id, out station))
+            if (IsStationValid(station)
+                && isStationExists(station, out station))
             {
                 station.CurrentFlight = null;
                 return true;
@@ -77,9 +78,10 @@ namespace Common.Data_Structures
         // O(1)
         public bool UpdateStation(StationModel updatedStation)
         {
-            if (_stations[updatedStation.Number].TryGetValue(updatedStation.Id, out StationModel existingStation))
+            if (IsStationValid(updatedStation)
+                && isStationExists(updatedStation, out StationModel currStation))
             {
-                _stations[existingStation.Number][existingStation.Id] = updatedStation;
+                _stations[currStation.Number][currStation.Id] = updatedStation;
                 return true;
             }
             return false;
@@ -88,47 +90,35 @@ namespace Common.Data_Structures
         // O(1)
         public bool IsStationEmpty(StationModel station)
         {
-            if (station.Number < 0 || station.Number >= _stations.Count)
+            if (!IsStationValid(station))
                 throw new ArgumentException();
-
-            // TODO: If the planned station is not empty, check if other stations in the same station's number are empty.
-            var currStation = _stations[station.Number].GetValueOrDefault(station.Id);
-            if (currStation == null)
+            if (!isStationExists(station, out station))
                 throw new StationNotFoundException();
 
-            return currStation.CurrentFlight == null;
+            return station.CurrentFlight == null;
         }
 
         // O(1)
         public bool MoveToStation(StationModel fromStation, StationModel toStation, FlightModel flight)
         {
-            if (toStation == null
-                || flight == null
-                || ((toStation.Number < 0 || toStation.Number >= _stations.Count))
-                || (fromStation != null && (fromStation.Number < 0 || fromStation.Number >= _stations.Count)))
+            if (!IsStationValid(toStation)
+                || flight == null)
                 throw new ArgumentException();
 
-            var targetStation = _stations[toStation.Number].GetValueOrDefault(toStation.Id);
-            if (targetStation == null)
+            if (!isStationExists(toStation, out toStation))
                 throw new StationNotFoundException();
 
-            // In case of Starting a landing / departure process.
-            if (fromStation == null)
+            if (IsStationValid(fromStation) && isStationExists(fromStation, out fromStation))
+                return MoveStation(fromStation, toStation, flight);
+            else // In case of Starting a landing / departure process.
                 return MoveStation(null, toStation, flight);
-
-            var startStation = _stations[fromStation.Number].GetValueOrDefault(fromStation.Id);
-            if (startStation == null)
-                throw new StationNotFoundException();
-
-            return MoveStation(fromStation, toStation, flight);
         }
 
         // O(n*m) - Dijakstra's algo
         public StationsPathModel FindFastestPath(int startIndex, int targetIndex)
         {
-            if (startIndex < 0 || startIndex >= _stations.Count
-                || targetIndex < 0 || targetIndex >= _stations.Count)
-                throw new ArgumentOutOfRangeException("Start index was out of the array's boundries.");
+            if (!IsStationValid(startIndex) || !IsStationValid(targetIndex))
+                throw new ArgumentOutOfRangeException();
 
             StationsTable[] table = new StationsTable[_stations.Count];
             InitStationsTable(table, startIndex);
@@ -139,16 +129,15 @@ namespace Common.Data_Structures
         // O(n*m) - Dijakstra's algo (for specific start & end stations)
         public StationsPathModel FindFastestPath(StationModel startStation, StationModel targetStation)
         {
-            int startIndex = startStation.Number;
-            int targetIndex = targetStation.Number;
-
-            if (startIndex < 0 || startIndex >= _stations.Count
-               || targetIndex < 0 || targetIndex >= _stations.Count)
+            if (!IsStationValid(startStation) || !IsStationValid(targetStation))
                 throw new ArgumentException("One of the stations isn't valid.");
 
-            if (!_stations[startIndex].TryGetValue(startStation.Id, out StationModel stationA)
-                || !_stations[targetIndex].TryGetValue(targetStation.Id, out StationModel stationB))
+            if (!isStationExists(startStation, out startStation)
+                || !isStationExists(targetStation, out targetStation))
                 throw new StationNotFoundException();
+
+            int startIndex = startStation.Number;
+            int targetIndex = targetStation.Number;
 
             StationsTable[] table = new StationsTable[_stations.Count];
             InitStationsTable(table, startIndex);
@@ -186,33 +175,6 @@ namespace Common.Data_Structures
         #endregion
 
         #region Private Functions
-        private void AddStationToHelperList(Dictionary<string, StationModel> stations)
-        {
-            foreach (var item in stations.Values)
-            {
-                foreach (var type in item.Types)
-                {
-                    switch (type)
-                    {
-                        case StationType.LandingExit:
-                            _endLandingStations.AddLast(item);
-                            break;
-                        case StationType.Landing:
-                            _startLandingStations.AddLast(item);
-                            break;
-                        case StationType.Departure:
-                            _startDepartureStations.AddLast(item);
-                            break;
-                        case StationType.Runway:
-                            _endDepartureStations.AddLast(item);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-        }
-
         // O(n)
         private void InitStationsTable(StationsTable[] table, int startIndex)
         {
@@ -297,6 +259,46 @@ namespace Common.Data_Structures
         #endregion
 
         #region Helper Fucntions
+        private bool IsStationValid(StationModel station)
+        {
+            return station != null
+                && station.Number >= 0
+                && station.Number < _stations.Count;
+        }
+        private bool IsStationValid(int stationIndex)
+        {
+            return stationIndex >= 0 && stationIndex < _stations.Count;
+        }
+        private bool isStationExists(StationModel station, out StationModel existingStation)
+        {
+            return _stations[station.Number].TryGetValue(station.Id, out existingStation);
+        }
+        private void AddStationToHelperList(Dictionary<string, StationModel> stations)
+        {
+            foreach (var item in stations.Values)
+            {
+                foreach (var type in item.Types)
+                {
+                    switch (type)
+                    {
+                        case StationType.LandingExit:
+                            _endLandingStations.AddLast(item);
+                            break;
+                        case StationType.Landing:
+                            _startLandingStations.AddLast(item);
+                            break;
+                        case StationType.Departure:
+                            _startDepartureStations.AddLast(item);
+                            break;
+                        case StationType.Runway:
+                            _endDepartureStations.AddLast(item);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
         private bool MoveStation(StationModel fromStation, StationModel toStation, FlightModel flight)
         {
             if (toStation.CurrentFlight == null)
@@ -341,7 +343,6 @@ namespace Common.Data_Structures
             destTable.Weight = weight;
             destTable.PrevStation = station;
         }
-
         private void FillIfTableValid(StationsTable[] table, int index)
         {
             foreach (var item in _stations[index].Values)

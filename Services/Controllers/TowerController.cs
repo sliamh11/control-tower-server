@@ -9,8 +9,10 @@ namespace Services.Controllers
     [Route("api/[controller]")]
     public class TowerController : Controller
     {
+        #region Private Fields
         private readonly ITowerManager _manager;
         private readonly ISimulatorManager _simulator;
+        #endregion
 
         public TowerController(ITowerManager manager, ISimulatorManager simulator)
         {
@@ -18,6 +20,7 @@ namespace Services.Controllers
             _simulator = simulator;
         }
 
+        #region Controllers
         [Route("")]
         public IActionResult Index() => Ok("In tower controller");
 
@@ -58,6 +61,7 @@ namespace Services.Controllers
                 return BadRequest($"Exception: {ex.Message}");
             }
         }
+        #endregion
 
         // AddStation - gets a list of objects from body as JSON and is translated to a StationModels, and then to a dictionary
     }

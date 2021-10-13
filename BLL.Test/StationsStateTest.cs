@@ -66,7 +66,7 @@ namespace BLL.Test
             try
             {
                 state.IsStationEmpty(station);
-                isValid = false; // If reached here - something went wrong.
+                isValid = false;
             }
             catch (Exception ex)
             {
@@ -265,7 +265,7 @@ namespace BLL.Test
             var flight = new FlightModel("test", FlightType.Landing);
             bool isValid;
 
-            // Test 1: Remove with a random station (throws StationNotFoundException)
+            // Test 1: Remove with a non-existing station (throws StationNotFoundException)
             var station = new StationModel(3, 4, new TimeSpan(0, 0, 40), StationType.LandingExit);
             try
             {
@@ -352,7 +352,14 @@ namespace BLL.Test
 
             // Test 1: Update a non existing station
             var station = new StationModel(2, 3, new TimeSpan(0, 0, 5), StationType.Departure, StationType.Landing);
-            isValid = state.UpdateStation(station);
+            try
+            {
+                isValid = state.UpdateStation(station);
+            }
+            catch (Exception ex)
+            {
+                isValid = ex is StationNotFoundException;
+            }
             Assert.IsFalse(isValid);
 
             // Test 2: Update an existing station
