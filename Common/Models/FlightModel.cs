@@ -11,7 +11,8 @@ namespace Common.Models
         public DateTime? LandingTime { get; set; }
         public FlightType Type { get; set; }
 
-        public FlightModel(string id, FlightType type)
+        public FlightModel() { }
+        public FlightModel(string id, FlightType type) : this()
         {
             Id = id;
             Type = type;

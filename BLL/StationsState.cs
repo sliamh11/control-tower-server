@@ -4,9 +4,11 @@ using Common.Enums;
 using Common.Models;
 using Common.Structs;
 using ControlTowerHub;
+using DAL;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BLL
 {
@@ -19,6 +21,7 @@ namespace BLL
         #region Private Fields
         private readonly StationsGraph _stations;
         private readonly IHubContext<TowerHub, ITowerHub> _hubContext;
+        private readonly ITowerRepository _dbRepository;
         private readonly object _stationsLock = new object();
         private readonly object _getLandingLock = new object();
         private readonly object _getDepartureLock = new object();
@@ -32,9 +35,10 @@ namespace BLL
         }
 
         // For DI
-        public StationsState(IHubContext<TowerHub, ITowerHub> hubContext) : this()
+        public StationsState(IHubContext<TowerHub, ITowerHub> hubContext, ITowerRepository dbRepository) : this()
         {
             _hubContext = hubContext;
+            _dbRepository = dbRepository;
         }
 
         #region State Functions
@@ -84,6 +88,7 @@ namespace BLL
             {
                 if (_stations.MoveToStation(fromStation, toStation, flight))
                 {
+                    // TODO: SaveMovement(fromStation, toStation) - complex scenario - 0 to 1
                     StateUpdated();
                     return true;
                 }
@@ -150,9 +155,33 @@ namespace BLL
                 return _stations.GetExitStation(type);
         }
         #endregion
-        
+
         #region Private Functions
         private void LoadStations()
+        {
+            var stationsList = _dbRepository.GetStations().ToList();
+            var stationsDict = new Dictionary<int, List<StationModel>>();
+            foreach (var station in stationsList)
+            {
+                if (stationsDict.TryGetValue(station.Number, out List<StationModel> list))
+                    list.Add(station);
+                else
+                    stationsDict[station.Number] = new List<StationModel>() { station };
+            }
+
+            stationsDict = (Dictionary<int, List<StationModel>>)stationsDict.OrderBy((pair) => pair.Key);
+
+            for (int i = 0; i < stationsDict.Count; i++)
+            {
+                var newDict = new Dictionary<string, StationModel>();
+                foreach (var station in stationsDict[i])
+                    newDict.Add(station.Id, station);
+
+                _stations.AddStation(newDict);
+            }
+
+        }
+        private void LoadStationsDummy()
         {
             // Normal stations
             var station = new StationModel(1, new TimeSpan(0, 1, 0), StationType.Landing);

@@ -1,24 +1,21 @@
 ﻿using Common.Enums;
 using System;
+using System.Collections.Generic;
 
 namespace Common.Models
 {
     public class StationModel
     {
         //[Key]//return  _datacontext.Stationsmodel.Include(s => s.CurrentFlight)
-        public string Id { get; private set; } // Competible with EF -> some say internal and not private, check
+        public string Id { get; set; } // Competible with EF -> some say internal and not private, check
         public int Number { get; set; }
         public int NextStation { get; set; }
-        
         public FlightModel CurrentFlight { get; set; }
-        public StationType[] Types { get; set; }
+        public ICollection<StationType> Types { get; set; }
         public StationStatuses Status { get; set; }
         public TimeSpan StandbyPeriod { get; set; }
 
-        public StationModel()
-        {
-
-        }
+        public StationModel() { }
 
         public StationModel(int nextStation, TimeSpan standBy, params StationType[] types) : this()
         {
@@ -28,8 +25,7 @@ namespace Common.Models
             StandbyPeriod = standBy;
             if (types == null)
             {
-                Types = new StationType[1];
-                Types[0] = StationType.Normal; // Default value.
+                Types = new StationType[] { StationType.Normal };
             }
             else
             {

@@ -1,5 +1,6 @@
 using BLL;
 using ControlTowerHub;
+using DAL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -7,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Simulator;
 using Simulator.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Services
 {
@@ -25,6 +28,7 @@ namespace Services
             services.AddControllers();
             services.AddLogicDependancies();
             services.AddSingleton<ISimulatorManager, SimulatorManager>();
+            services.AddSingleton<ITowerRepository, TowerRepository>();
             services.AddSignalR();
             services.AddCors(options =>
             {
@@ -36,6 +40,8 @@ namespace Services
                     .AllowCredentials();
                 });
             });
+            services.AddDbContext<TowerContext>(opts =>
+            opts.UseSqlServer(Configuration.GetConnectionString("Default")), ServiceLifetime.Singleton);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
