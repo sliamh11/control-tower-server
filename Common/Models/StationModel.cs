@@ -6,8 +6,7 @@ namespace Common.Models
 {
     public class StationModel
     {
-        //[Key]//return  _datacontext.Stationsmodel.Include(s => s.CurrentFlight)
-        public string Id { get; set; } // Competible with EF -> some say internal and not private, check
+        public string Id { get; set; } 
         public int Number { get; set; }
         public int NextStation { get; set; }
         public FlightModel CurrentFlight { get; set; }

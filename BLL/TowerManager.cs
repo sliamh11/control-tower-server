@@ -72,10 +72,7 @@ namespace BLL
         {
             if (_stationsState.CanAddFlight(FlightType.Departure))
             {
-                var depLogic = _provider.GetRequiredService<IDepartureLogic>();
-                var stationsLogic = _provider.GetRequiredService<IStationsLogic>();
-
-                var depObj = new DepartureObj(depLogic, stationsLogic, flightId);
+                var depObj = CreateDepartureObj(flightId);
                 if (await depObj.Start())
                     return true;
             }
@@ -88,10 +85,7 @@ namespace BLL
         {
             if (_stationsState.CanAddFlight(FlightType.Landing))
             {
-                var landLogic = _provider.GetRequiredService<ILandingLogic>();
-                var stationsLogic = _provider.GetRequiredService<IStationsLogic>();
-
-                var landObj = new LandingObj(landLogic, stationsLogic, flightId);
+                var landObj = CreateLandingObj(flightId);
                 if (await landObj.Start())
                     return true;
             }
@@ -144,6 +138,18 @@ namespace BLL
                     break;
             }
             return removableList;
+        }
+        private LandingObj CreateLandingObj(string flightId)
+        {
+            var landLogic = _provider.GetRequiredService<ILandingLogic>();
+            var stationsLogic = _provider.GetRequiredService<IStationsLogic>();
+            return new LandingObj(landLogic, stationsLogic, flightId);
+        }
+        private DepartureObj CreateDepartureObj(string flightId)
+        {
+            var depLogic = _provider.GetRequiredService<IDepartureLogic>();
+            var stationsLogic = _provider.GetRequiredService<IStationsLogic>();
+            return new DepartureObj(depLogic, stationsLogic, flightId);
         }
         #endregion
     }
